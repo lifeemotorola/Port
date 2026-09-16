@@ -19,6 +19,18 @@ import threading
 import concurrent.futures
 from datetime import datetime
 
+# Import Guide Module
+try:
+    from core.guide import get_playbook_html_section, print_playbook_cli, get_playbook_for_port, format_playbook_cli
+except ImportError:
+    try:
+        from guide import get_playbook_html_section, print_playbook_cli, get_playbook_for_port, format_playbook_cli
+    except ImportError:
+        get_playbook_html_section = lambda ports, target="<target>": ""
+        print_playbook_cli = None
+        get_playbook_for_port = None
+        format_playbook_cli = None
+
 # Base directories
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORE_DIR = os.path.join(BASE_DIR, "core")
@@ -1182,6 +1194,13 @@ def export_html_report(scan_data, filepath):
         r = p.get("risk", "Low")
         risk_counts[r] = risk_counts.get(r, 0) + 1
 
+    # Render step-by-step guide section
+    guide_html = ""
+    try:
+        guide_html = get_playbook_html_section(open_ports, target=scan_data.get("target", "<target>"))
+    except Exception:
+        pass
+
     rows_html = []
     for p in open_ports:
         risk = p.get("risk", "Low")
@@ -1380,6 +1399,84 @@ def export_html_report(scan_data, filepath):
             border-top: 1px solid var(--border);
             padding-top: 20px;
         }}
+        /* Step-by-Step Playbook Guide Styles */
+        .guide-section {{ margin-top: 40px; }}
+        .guide-card {{
+            background: #151d2f;
+            border: 1px solid #233044;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }}
+        .guide-card-header {{
+            background: #1a233a;
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .guide-card-header:hover {{ background: #202b46; }}
+        .guide-port-pill {{
+            background: #00ffcc;
+            color: #0b0f19;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }}
+        .toggle-icon {{ font-size: 13px; color: #38bdf8; }}
+        .guide-body {{ padding: 18px; }}
+        .guide-summary {{ color: #94a3b8; font-size: 14px; margin-top: 0; line-height: 1.5; }}
+        .guide-step {{
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }}
+        .step-header {{ font-size: 15px; margin-bottom: 8px; color: #fff; }}
+        .step-num {{
+            background: #38bdf8;
+            color: #0b0f19;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }}
+        .step-desc {{ font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }}
+        .cmd-block {{
+            background: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }}
+        .cmd-label {{
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 10px;
+            min-width: 75px;
+            text-align: center;
+        }}
+        .kali-label {{ background: #1d4ed8; color: #fff; }}
+        .termux-label {{ background: #15803d; color: #fff; }}
+        .cmd-block code {{ color: #00ffcc; flex-grow: 1; word-break: break-all; }}
+        .indicator-box {{
+            margin-top: 8px;
+            font-size: 12px;
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.08);
+            padding: 6px 10px;
+            border-radius: 4px;
+        }}
     </style>
 </head>
 <body>
@@ -1432,6 +1529,8 @@ def export_html_report(scan_data, filepath):
             </tbody>
         </table>
 
+        {guide_html}
+
         <div class="footer">
             Generated with Port Tool (Advanced Internet Port Suite for Kali Linux & Termux) &bull; For Authorized Security Testing Only
         </div>
@@ -1445,6 +1544,13 @@ def export_html_report(scan_data, filepath):
                 r.style.display = r.innerText.toLowerCase().includes(val) ? '' : 'none';
             }});
         }});
+
+        function toggleGuide(id) {{
+            const el = document.getElementById(id);
+            if (el) {{
+                el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+            }}
+        }}
     </script>
 </body>
 </html>
@@ -1474,8 +1580,14 @@ def main():
     p_scan.add_argument("-m", "--mode", choices=["fast", "deep", "udp"], default="fast", help="Scan mode")
     p_scan.add_argument("-T", "--threads", type=int, default=100, help="Concurrency worker threads")
     p_scan.add_argument("-W", "--timeout", type=float, default=1.5, help="Socket timeout in seconds")
+    p_scan.add_argument("-g", "--guide", action="store_true", help="Display step-by-step next actions & playbook for open ports")
     p_scan.add_argument("-o", "--output", help="Save report to file (.txt, .json, .csv, .html)")
     p_scan.add_argument("--json", action="store_true", help="Print raw JSON to stdout")
+
+    # GUIDE subcommand
+    p_guide = subparsers.add_parser("guide", help="Show step-by-step security playbook for a port")
+    p_guide.add_argument("port", help="Port number or service keyword")
+    p_guide.add_argument("-t", "--target", default="<target>", help="Target host or IP for command interpolation")
 
     # INSPECT subcommand
     p_inspect = subparsers.add_parser("inspect", help="Inspect local active listening ports")
@@ -1560,6 +1672,15 @@ def main():
 
                     print(f"{port_str:<10} | {p.get('service', 'unknown'):<16} | {risk_color}{risk:<10}{C_RESET} | {str(p.get('latency_ms', '')) + 'ms':<8} | {banner_display[:35]}")
                 print("-" * 85)
+
+                if args.guide and data.get("open_ports"):
+                    is_termux = bool(os.environ.get("TERMUX_VERSION") or os.path.exists("/data/data/com.termux"))
+                    print(f"\n{C_BOLD}🎯 STEP-BY-STEP SECURITY PLAYBOOKS FOR DISCOVERED OPEN PORTS:{C_RESET}")
+                    for p in data["open_ports"]:
+                        port_num = p["port"]
+                        serv_name = p.get("service")
+                        if print_playbook_cli:
+                            print_playbook_cli(port_num, target=data.get("target", "<target>"), service_name=serv_name, is_termux=is_termux)
             else:
                 print(f"{C_YELLOW}[!] No open ports detected on target within specified range.{C_RESET}")
 
@@ -1637,6 +1758,13 @@ def main():
                 if item.get("notes"):
                     print(f"  Security    : {item['notes']}")
                 print("-" * 65)
+
+    elif args.action == "guide":
+        is_termux = bool(os.environ.get("TERMUX_VERSION") or os.path.exists("/data/data/com.termux"))
+        if print_playbook_cli:
+            print_playbook_cli(args.port, target=args.target, is_termux=is_termux)
+        else:
+            print(f"{C_RED}[!] Guide engine unavailable.{C_RESET}")
 
     else:
         parser.print_help()

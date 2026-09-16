@@ -72,7 +72,7 @@ fi
 
 # Set executable permissions
 chmod +x "$SCRIPT_DIR/port.sh"
-chmod +x "$SCRIPT_DIR/core/engine.py" 2>/dev/null || true
+chmod +x "$SCRIPT_DIR/core/engine.py" "$SCRIPT_DIR/core/guide.py" 2>/dev/null || true
 
 # Deploy to OPT_DIR and create BIN symlink
 echo -e "\n${C_CYAN}[*] Setting up application files...${C_RESET}"
@@ -80,18 +80,18 @@ echo -e "\n${C_CYAN}[*] Setting up application files...${C_RESET}"
 if [ "$IS_TERMUX" = true ]; then
     mkdir -p "$OPT_DIR"
     cp -r "$SCRIPT_DIR"/* "$OPT_DIR/" 2>/dev/null || true
-    chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py" 2>/dev/null || true
+    chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py" "$OPT_DIR/core/guide.py" 2>/dev/null || true
     ln -sf "$OPT_DIR/port.sh" "$BIN_DIR/port"
 elif [ "$IS_ROOT" = true ]; then
     mkdir -p "$OPT_DIR"
     cp -r "$SCRIPT_DIR"/* "$OPT_DIR/" 2>/dev/null || true
-    chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py" 2>/dev/null || true
+    chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py" "$OPT_DIR/core/guide.py" 2>/dev/null || true
     ln -sf "$OPT_DIR/port.sh" "$BIN_DIR/port"
 else
     # Non-root linux
     if sudo mkdir -p "$OPT_DIR" 2>/dev/null; then
         sudo cp -r "$SCRIPT_DIR"/* "$OPT_DIR/"
-        sudo chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py"
+        sudo chmod +x "$OPT_DIR/port.sh" "$OPT_DIR/core/engine.py" "$OPT_DIR/core/guide.py"
         sudo ln -sf "$OPT_DIR/port.sh" "$BIN_DIR/port"
     else
         # Fallback to user local link
@@ -105,7 +105,10 @@ echo -e "\n${C_GREEN}${C_BOLD}[✓] Port tool installed successfully!${C_RESET}\
 echo -e "You can now run ${C_CYAN}${C_BOLD}port${C_RESET} from any directory in your terminal:"
 echo -e "  ${C_WHITE}port${C_RESET}                          Launch interactive menu"
 echo -e "  ${C_WHITE}port -t <target> -p top100${C_RESET}    Scan remote target"
+echo -e "  ${C_WHITE}port -t <target> --guide${C_RESET}      Scan target and get step-by-step playbooks"
+echo -e "  ${C_WHITE}port -g 445${C_RESET}                   Step-by-step action guide for port 445"
 echo -e "  ${C_WHITE}port -i${C_RESET}                       Inspect local listening ports"
 echo -e "  ${C_WHITE}port -k 8080${C_RESET}                  Kill process on port 8080"
 echo -e "  ${C_WHITE}port -q 445${C_RESET}                   Lookup port knowledge base"
 echo -e "  ${C_WHITE}port --help${C_RESET}                   Show full CLI options\n"
+echo -e "${C_GRAY}Reference: https://termux.achik.us/${C_RESET}\n"

@@ -114,7 +114,7 @@ find_engine() {
 
 find_engine
 
-# ASCII Art Banner
+# ANSI Art Banner
 print_banner() {
     echo -e "${C_CYAN}${C_BOLD}"
     cat << "EOF"
@@ -129,6 +129,7 @@ EOF
     echo -e "   ${C_WHITE}${C_BOLD}Advance Internet Port Tool${C_RESET} ${C_GRAY}v${APP_VERSION}${C_RESET}"
     echo -e "   ${C_PURPLE}[ Kali Linux & Termux Edition ]${C_RESET}"
     echo -e "   ${C_CYAN}OS:${C_RESET} ${OS_NAME} ${C_GRAY}|${C_RESET} ${C_CYAN}User:${C_RESET} $(whoami) $([ "$IS_ROOT" = true ] && echo -e "${C_GREEN}[ROOT]${C_RESET}" || echo -e "${C_YELLOW}[USER]${C_RESET}")"
+    echo -e "   ${C_GRAY}Reference & Termux Tutorials: https://termux.achik.us/${C_RESET}"
     echo -e "${C_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}\n"
 }
 
@@ -136,14 +137,16 @@ EOF
 show_help() {
     print_banner
     echo -e "${C_BOLD}USAGE:${C_RESET}"
-    echo -e "  ./port.sh                        Launch interactive menu UI"
-    echo -e "  ./port.sh -t <target> [options]  Non-interactive CLI mode\n"
+    echo -e "  ./port.sh                               Launch interactive menu UI"
+    echo -e "  ./port.sh -t <target> [options]         Non-interactive scan mode"
+    echo -e "  ./port.sh -g <port> [target]            Step-by-step guide for a port\n"
 
-    echo -e "${C_BOLD}SCANNING OPTIONS:${C_RESET}"
+    echo -e "${C_BOLD}SCANNING & GUIDED ASSESSMENT:${C_RESET}"
     echo -e "  ${C_CYAN}-t, --target <host>${C_RESET}        Target IP or domain (e.g. 192.168.1.1, scanme.org)"
     echo -e "  ${C_CYAN}-p, --ports <ports>${C_RESET}        Ports: ${C_YELLOW}top20${C_RESET}, ${C_YELLOW}top100${C_RESET}, ${C_YELLOW}top1000${C_RESET}, ${C_YELLOW}all${C_RESET}, ${C_YELLOW}wellknown${C_RESET}"
     echo -e "                             Or ranges/lists: ${C_YELLOW}80,443,8000-8080${C_RESET} (Default: top100)"
     echo -e "  ${C_CYAN}-m, --mode <mode>${C_RESET}          Scan mode: ${C_YELLOW}fast${C_RESET} (default), ${C_YELLOW}deep${C_RESET} (banner+SSL), ${C_YELLOW}udp${C_RESET}, ${C_YELLOW}nmap${C_RESET}"
+    echo -e "  ${C_CYAN}-g, --guide [port]${C_RESET}         Display step-by-step action guide & next commands for open ports"
     echo -e "  ${C_CYAN}-T, --threads <num>${C_RESET}        Concurrency threads (Default: 100, range: 1-500)"
     echo -e "  ${C_CYAN}-W, --timeout <sec>${C_RESET}        Socket timeout in seconds (Default: 1.5)"
     echo -e "  ${C_CYAN}-o, --output <file>${C_RESET}        Export report: .txt, .json, .csv, or .html\n"
@@ -168,20 +171,18 @@ show_help() {
     echo -e "${C_BOLD}PRACTICAL EXAMPLES:${C_RESET}"
     echo -e "  ${C_GRAY}# Interactive Menu UI${C_RESET}"
     echo -e "  ./port.sh\n"
-    echo -e "  ${C_GRAY}# Fast scan Top 100 ports on remote target${C_RESET}"
-    echo -e "  ./port.sh -t 192.168.1.1 -p top100\n"
-    echo -e "  ${C_GRAY}# Deep scan with banner grabbing & HTML report${C_RESET}"
+    echo -e "  ${C_GRAY}# Fast scan and automatically show step-by-step next actions for open ports${C_RESET}"
+    echo -e "  ./port.sh -t 192.168.1.1 -p 21,22,80,445 --guide\n"
+    echo -e "  ${C_GRAY}# Show step-by-step exploitation & audit guide for port 445 (SMB)${C_RESET}"
+    echo -e "  ./port.sh -g 445 192.168.1.50\n"
+    echo -e "  ${C_GRAY}# Show step-by-step guide for Redis or MySQL${C_RESET}"
+    echo -e "  ./port.sh -g redis\n"
+    echo -e "  ${C_GRAY}# Deep scan with banner grabbing & HTML dashboard report${C_RESET}"
     echo -e "  ./port.sh -t example.com -p 22,80,443,8080 -m deep -o reports/example.html\n"
     echo -e "  ${C_GRAY}# Inspect what's listening locally and free port 8080${C_RESET}"
     echo -e "  ./port.sh -i"
     echo -e "  ./port.sh -k 8080\n"
-    echo -e "  ${C_GRAY}# Start SSH honeypot logging intrusions${C_RESET}"
-    echo -e "  ./port.sh --honeypot 2222 --service ssh\n"
-    echo -e "  ${C_GRAY}# Forward local port 8080 to remote server${C_RESET}"
-    echo -e "  ./port.sh -f 8080:192.168.1.50:80\n"
-    echo -e "  ${C_GRAY}# Search port vulnerability database${C_RESET}"
-    echo -e "  ./port.sh -q 445"
-    echo -e "  ./port.sh -q redis\n"
+    echo -e "  ${C_GRAY}# Reference tutorial commands: https://termux.achik.us/${C_RESET}\n"
 }
 
 # Auto Dependency Installer
@@ -349,20 +350,21 @@ interactive_menu() {
         echo -e "${C_BOLD}MAIN MENU:${C_RESET}\n"
         echo -e "  ${C_CYAN}[1]${C_RESET}  Fast TCP Port Scanner (Top Ports / Range / Full)"
         echo -e "  ${C_CYAN}[2]${C_RESET}  Deep Service & Banner Detector (Fingerprint / HTTP / SSL)"
-        echo -e "  ${C_CYAN}[3]${C_RESET}  UDP Port Scanner (DNS, NTP, SNMP, DHCP, etc.)"
-        echo -e "  ${C_CYAN}[4]${C_RESET}  Local Port Inspector (View Active Listening Sockets & PIDs)"
-        echo -e "  ${C_CYAN}[5]${C_RESET}  Kill Process on Port (Free up occupied port)"
-        echo -e "  ${C_CYAN}[6]${C_RESET}  Port Listener / Reverse Shell Catcher (Netcat Mode)"
-        echo -e "  ${C_CYAN}[7]${C_RESET}  Port Honeypot & Intrusion Monitor (Detect & Log Attacks)"
-        echo -e "  ${C_CYAN}[8]${C_RESET}  TCP Port Forwarder / Relay Proxy (Local -> Remote)"
-        echo -e "  ${C_CYAN}[9]${C_RESET}  Firewall Outbound Egress Checker (Find Blocked Ports)"
-        echo -e "  ${C_CYAN}[10]${C_RESET} Network Interfaces & Public IP Lookup"
-        echo -e "  ${C_CYAN}[11]${C_RESET} Port Knowledgebase & Vulnerability Directory (Search 200+ Ports)"
-        echo -e "  ${C_CYAN}[12]${C_RESET} Nmap Advanced Scan Integration"
-        echo -e "  ${C_CYAN}[13]${C_RESET} Install / Update Dependencies (Kali & Termux)"
+        echo -e "  ${C_CYAN}[3]${C_RESET}  🎯 Step-by-Step Port Action Guide & Playbooks (What to do when port is open)"
+        echo -e "  ${C_CYAN}[4]${C_RESET}  UDP Port Scanner (DNS, NTP, SNMP, DHCP, etc.)"
+        echo -e "  ${C_CYAN}[5]${C_RESET}  Local Port Inspector (View Active Listening Sockets & PIDs)"
+        echo -e "  ${C_CYAN}[6]${C_RESET}  Kill Process on Port (Free up occupied port)"
+        echo -e "  ${C_CYAN}[7]${C_RESET}  Port Listener / Reverse Shell Catcher (Netcat Mode)"
+        echo -e "  ${C_CYAN}[8]${C_RESET}  Port Honeypot & Intrusion Monitor (Detect & Log Attacks)"
+        echo -e "  ${C_CYAN}[9]${C_RESET}  TCP Port Forwarder / Relay Proxy (Local -> Remote)"
+        echo -e "  ${C_CYAN}[10]${C_RESET} Firewall Outbound Egress Checker (Find Blocked Ports)"
+        echo -e "  ${C_CYAN}[11]${C_RESET} Network Interfaces & Public IP Lookup"
+        echo -e "  ${C_CYAN}[12]${C_RESET} Port Knowledgebase & Vulnerability Directory (Search 200+ Ports)"
+        echo -e "  ${C_CYAN}[13]${C_RESET} Nmap Advanced Scan Integration"
+        echo -e "  ${C_CYAN}[14]${C_RESET} Install / Update Dependencies (Kali & Termux)"
         echo -e "  ${C_RED}[0]${C_RESET}  Exit\n"
 
-        read -rp "Select an option [0-13]: " choice
+        read -rp "Select an option [0-14]: " choice
         case "$choice" in
             1)
                 echo -e "\n${C_BOLD}--- Fast TCP Port Scanner ---${C_RESET}"
@@ -378,6 +380,11 @@ interactive_menu() {
 
                 if [ -n "$PYTHON_CMD" ] && [ -n "$ENGINE_PATH" ]; then
                     $PYTHON_CMD "$ENGINE_PATH" scan -t "$t_host" -p "$t_ports" -m fast "${out_arg[@]}"
+                    echo ""
+                    read -rp "Would you like to view step-by-step next actions for the open ports? (y/n) [default: y]: " want_g
+                    if [[ ! "$want_g" =~ ^[Nn]$ ]]; then
+                        $PYTHON_CMD "$ENGINE_PATH" scan -t "$t_host" -p "$t_ports" -m fast --guide
+                    fi
                 else
                     run_bash_port_scan "$t_host" "$t_ports"
                 fi
@@ -401,6 +408,11 @@ interactive_menu() {
 
                 if [ -n "$PYTHON_CMD" ] && [ -n "$ENGINE_PATH" ]; then
                     $PYTHON_CMD "$ENGINE_PATH" scan -t "$t_host" -p "$t_ports" -m deep "${out_arg[@]}"
+                    echo ""
+                    read -rp "Would you like to view step-by-step next actions for the open ports? (y/n) [default: y]: " want_g
+                    if [[ ! "$want_g" =~ ^[Nn]$ ]]; then
+                        $PYTHON_CMD "$ENGINE_PATH" scan -t "$t_host" -p "$t_ports" -m deep --guide
+                    fi
                 else
                     run_bash_port_scan "$t_host" "$t_ports"
                 fi
@@ -409,6 +421,24 @@ interactive_menu() {
                 ;;
 
             3)
+                echo -e "\n${C_BOLD}--- 🎯 Step-by-Step Port Action Guide & Playbooks ---${C_RESET}"
+                echo -e "${C_GRAY}Reference: https://termux.achik.us/${C_RESET}\n"
+                echo -e "Available playbooks for ports: ${C_YELLOW}21 (FTP), 22 (SSH), 23 (Telnet), 25 (SMTP), 53 (DNS), 80 (HTTP), 443 (HTTPS), 445 (SMB), 1433 (MSSQL), 2049 (NFS), 2375 (Docker), 3306 (MySQL), 3389 (RDP), 5432 (Postgres), 5900 (VNC), 6379 (Redis), 8080 (Tomcat), 9200 (Elastic), 10000 (Webmin), 27017 (MongoDB)${C_RESET}"
+                read -rp "Enter port number or service keyword (e.g. 445, 80, redis, smb): " g_port
+                [ -z "$g_port" ] && continue
+                read -rp "Enter target host/IP [optional, default: <target>]: " g_target
+                [ -z "$g_target" ] && g_target="<target>"
+
+                if [ -n "$PYTHON_CMD" ]; then
+                    $PYTHON_CMD "$CORE_DIR/guide.py" "$g_port" "$g_target"
+                else
+                    echo -e "${C_RED}[!] Python required for guide engine.${C_RESET}"
+                fi
+                echo ""
+                read -rp "Press Enter to return to menu..."
+                ;;
+
+            4)
                 echo -e "\n${C_BOLD}--- UDP Port Scanner ---${C_RESET}"
                 read -rp "Enter target host/IP: " t_host
                 [ -z "$t_host" ] && continue
@@ -424,7 +454,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            4)
+            5)
                 echo -e "\n${C_BOLD}--- Local Port Inspector ---${C_RESET}"
                 if [ -n "$PYTHON_CMD" ] && [ -n "$ENGINE_PATH" ]; then
                     $PYTHON_CMD "$ENGINE_PATH" inspect
@@ -435,7 +465,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            5)
+            6)
                 echo -e "\n${C_BOLD}--- Kill Process on Port ---${C_RESET}"
                 read -rp "Enter port number to free up (e.g. 8080): " k_port
                 if [ -n "$k_port" ]; then
@@ -449,7 +479,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            6)
+            7)
                 echo -e "\n${C_BOLD}--- Port Listener / Reverse Shell Catcher ---${C_RESET}"
                 read -rp "Enter port to listen on (e.g. 4444): " l_port
                 [ -z "$l_port" ] && continue
@@ -471,7 +501,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            7)
+            8)
                 echo -e "\n${C_BOLD}--- Port Honeypot & Intrusion Monitor ---${C_RESET}"
                 read -rp "Enter port to expose as honeypot (e.g. 2222, 8080, 21): " h_port
                 [ -z "$h_port" ] && continue
@@ -488,7 +518,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            8)
+            9)
                 echo -e "\n${C_BOLD}--- TCP Port Forwarder / Relay Proxy ---${C_RESET}"
                 read -rp "Enter local port to listen on (e.g. 8080): " lp
                 read -rp "Enter remote target HOST:PORT (e.g. 192.168.1.100:80): " rp
@@ -505,7 +535,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            9)
+            10)
                 echo -e "\n${C_BOLD}--- Firewall Outbound Egress Checker ---${C_RESET}"
                 if [ -n "$PYTHON_CMD" ] && [ -n "$ENGINE_PATH" ]; then
                     $PYTHON_CMD "$ENGINE_PATH" egress
@@ -516,12 +546,12 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            10)
+            11)
                 show_ip_info
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            11)
+            12)
                 echo -e "\n${C_BOLD}--- Port Knowledgebase & Vulnerability Directory ---${C_RESET}"
                 read -rp "Enter port number or service keyword (e.g. 445, 3389, ssh, database): " q
                 if [ -n "$q" ]; then
@@ -535,7 +565,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            12)
+            13)
                 echo -e "\n${C_BOLD}--- Nmap Integration ---${C_RESET}"
                 read -rp "Enter target host/IP: " n_target
                 [ -z "$n_target" ] && continue
@@ -546,7 +576,7 @@ interactive_menu() {
                 read -rp "Press Enter to return to menu..."
                 ;;
 
-            13)
+            14)
                 install_dependencies
                 read -rp "Press Enter to return to menu..."
                 ;;
@@ -557,7 +587,7 @@ interactive_menu() {
                 ;;
 
             *)
-                echo -e "${C_RED}[!] Invalid option. Please choose between 0 and 13.${C_RESET}"
+                echo -e "${C_RED}[!] Invalid option. Please choose between 0 and 14.${C_RESET}"
                 sleep 1
                 ;;
         esac
@@ -584,9 +614,25 @@ parse_cli() {
     LOOKUP_QUERY=""
     DO_IP=false
     DO_INSTALL=false
+    DO_GUIDE=false
+    GUIDE_PORT=""
+    GUIDE_TARGET=""
 
     while [ $# -gt 0 ]; do
         case "$1" in
+            -g|--guide)
+                DO_GUIDE=true
+                if [ -n "$2" ] && [[ ! "$2" =~ ^- ]]; then
+                    GUIDE_PORT="$2"
+                    shift 2
+                    if [ -n "$1" ] && [[ ! "$1" =~ ^- ]]; then
+                        GUIDE_TARGET="$1"
+                        shift
+                    fi
+                else
+                    shift
+                fi
+                ;;
             -t|--target)
                 TARGET="$2"
                 shift 2
@@ -681,6 +727,15 @@ parse_cli() {
     # Execute specific actions based on flags
     if [ "$DO_INSTALL" = true ]; then
         install_dependencies
+        exit 0
+    fi
+
+    if [ -n "$GUIDE_PORT" ] && [ -z "$TARGET" ]; then
+        if [ -n "$PYTHON_CMD" ]; then
+            $PYTHON_CMD "$CORE_DIR/guide.py" "$GUIDE_PORT" "${GUIDE_TARGET:-<target>}"
+        else
+            echo -e "${C_RED}[!] Python required for guide engine.${C_RESET}"
+        fi
         exit 0
     fi
 
@@ -780,9 +835,11 @@ parse_cli() {
 
         out_arg=()
         [ -n "$OUTPUT" ] && out_arg=("-o" "$OUTPUT")
+        guide_flag=()
+        [ "$DO_GUIDE" = true ] && guide_flag=("-g")
 
         if [ -n "$PYTHON_CMD" ] && [ -n "$ENGINE_PATH" ]; then
-            $PYTHON_CMD "$ENGINE_PATH" scan -t "$TARGET" -p "$PORTS" -m "$MODE" -T "$THREADS" -W "$TIMEOUT" "${out_arg[@]}"
+            $PYTHON_CMD "$ENGINE_PATH" scan -t "$TARGET" -p "$PORTS" -m "$MODE" -T "$THREADS" -W "$TIMEOUT" "${out_arg[@]}" "${guide_flag[@]}"
         else
             run_bash_port_scan "$TARGET" "$PORTS"
         fi

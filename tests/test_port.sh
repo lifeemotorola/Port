@@ -107,6 +107,15 @@ run_test "Honeypot intrusion detection (--honeypot)" "
     cat '$SCRIPT_DIR'/logs/honeypot_port_37775_*.log | grep -q 'TEST_PAYLOAD_AUTOTEST'
 "
 
+# Test 15: Step-by-Step Guide for Port 445 (SMB)
+run_test "Step-by-Step Playbook Guide (-g 445)" "'$PORT_CMD' -g 445 192.168.1.100 | grep -q 'STEP 1: Check for Critical SMB RCE'"
+
+# Test 16: Step-by-Step Guide for Redis keyword
+run_test "Step-by-Step Playbook Guide (-g redis)" "'$PORT_CMD' -g redis 10.0.0.5 | grep -q 'STEP 1: Test Unauthenticated Access'"
+
+# Test 17: Scan with --guide flag on localhost
+run_test "Scan with Step-by-Step Guide (--guide)" "'$PORT_CMD' -t 127.0.0.1 -p 22 --guide | grep -q 'STEP-BY-STEP PLAYBOOK:'"
+
 # Clean up test reports
 rm -f "$HTML_REP" "$JSON_REP" "$CSV_REP" "$SCRIPT_DIR"/logs/honeypot_port_37775_*.log "$SCRIPT_DIR"/logs/honeypot_port_37775_*.json
 
