@@ -1,0 +1,1748 @@
+[
+  {
+    "port": 7,
+    "proto": "tcp/udp",
+    "service": "echo",
+    "name": "Echo Protocol",
+    "desc": "RFC 862 Echo service",
+    "risk": "Low",
+    "notes": "Can be leveraged in ping-pong amplification attacks."
+  },
+  {
+    "port": 9,
+    "proto": "tcp/udp",
+    "service": "discard",
+    "name": "Discard Protocol",
+    "desc": "RFC 863 Discard sink",
+    "risk": "Informational",
+    "notes": "Discards all data received."
+  },
+  {
+    "port": 13,
+    "proto": "tcp/udp",
+    "service": "daytime",
+    "name": "Daytime Protocol",
+    "desc": "RFC 867 Daytime string",
+    "risk": "Informational",
+    "notes": "Information leakage about system time and timezone."
+  },
+  {
+    "port": 17,
+    "proto": "tcp/udp",
+    "service": "qotd",
+    "name": "Quote of the Day",
+    "desc": "RFC 865 Quote of the day",
+    "risk": "Low",
+    "notes": "Historic service; potential DDoS amplifier."
+  },
+  {
+    "port": 19,
+    "proto": "tcp/udp",
+    "service": "chargen",
+    "name": "Character Generator",
+    "desc": "RFC 864 Character generator",
+    "risk": "Medium",
+    "notes": "Frequently abused for UDP amplification reflection DDoS attacks."
+  },
+  {
+    "port": 20,
+    "proto": "tcp",
+    "service": "ftp-data",
+    "name": "FTP Data Transfer",
+    "desc": "File Transfer Protocol (Default data)",
+    "risk": "Medium",
+    "notes": "Cleartext file transfer stream; susceptible to interception."
+  },
+  {
+    "port": 21,
+    "proto": "tcp",
+    "service": "ftp",
+    "name": "FTP Control",
+    "desc": "File Transfer Protocol (Control connection)",
+    "risk": "High",
+    "notes": "Cleartext authentication; anonymous login; historic backdoors (vsftpd 2.3.4, ProFTPD 1.3.3c)."
+  },
+  {
+    "port": 22,
+    "proto": "tcp",
+    "service": "ssh",
+    "name": "SSH (Secure Shell)",
+    "desc": "Encrypted remote terminal and file transfer",
+    "risk": "Medium",
+    "notes": "Brute-force password guessing; check version for regreSSHion (CVE-2024-6387) and liblzma backdoor."
+  },
+  {
+    "port": 23,
+    "proto": "tcp",
+    "service": "telnet",
+    "name": "Telnet",
+    "desc": "Unencrypted interactive text communication",
+    "risk": "Critical",
+    "notes": "Transmits credentials and commands in plain text. Vulnerable to sniffing and MITM."
+  },
+  {
+    "port": 25,
+    "proto": "tcp",
+    "service": "smtp",
+    "name": "SMTP (Simple Mail Transfer)",
+    "desc": "E-mail routing and relaying",
+    "risk": "Medium",
+    "notes": "Test for open mail relay, user enumeration (VRFY/EXPN/RCPT TO), and STARTTLS availability."
+  },
+  {
+    "port": 37,
+    "proto": "tcp/udp",
+    "service": "time",
+    "name": "Time Protocol",
+    "desc": "RFC 868 Time service",
+    "risk": "Informational",
+    "notes": "Returns 32-bit timestamp."
+  },
+  {
+    "port": 43,
+    "proto": "tcp",
+    "service": "whois",
+    "name": "WHOIS Protocol",
+    "desc": "Domain/IP ownership query",
+    "risk": "Informational",
+    "notes": "Reconnaissance of registrar and domain ownership details."
+  },
+  {
+    "port": 49,
+    "proto": "tcp/udp",
+    "service": "tacacs",
+    "name": "TACACS Login Host",
+    "desc": "Terminal Access Controller Access-Control",
+    "risk": "High",
+    "notes": "Network device authentication; cleartext passwords in TACACS v1/v2."
+  },
+  {
+    "port": 53,
+    "proto": "tcp/udp",
+    "service": "dns",
+    "name": "Domain Name System",
+    "desc": "Translates domain names to IP addresses",
+    "risk": "Medium",
+    "notes": "Zone transfers (AXFR), DNS cache poisoning, open DNS resolvers used in massive DDoS amplification."
+  },
+  {
+    "port": 67,
+    "proto": "udp",
+    "service": "dhcps",
+    "name": "DHCP Server",
+    "desc": "Dynamic Host Configuration Protocol server",
+    "risk": "Medium",
+    "notes": "Rogue DHCP spoofing, DHCP starvation attack, and default gateway manipulation."
+  },
+  {
+    "port": 68,
+    "proto": "udp",
+    "service": "dhcpc",
+    "name": "DHCP Client",
+    "desc": "DHCP client listening for server response",
+    "risk": "Low",
+    "notes": "Receives DHCP lease offers."
+  },
+  {
+    "port": 69,
+    "proto": "udp",
+    "service": "tftp",
+    "name": "TFTP",
+    "desc": "Trivial File Transfer Protocol",
+    "risk": "High",
+    "notes": "No password or authentication mechanism. Often leaks Cisco/router configuration files and firmware."
+  },
+  {
+    "port": 70,
+    "proto": "tcp",
+    "service": "gopher",
+    "name": "Gopher Protocol",
+    "desc": "Legacy text information retrieval",
+    "risk": "Low",
+    "notes": "Historic protocol; sometimes used in SSRF exploitation to craft raw TCP payloads."
+  },
+  {
+    "port": 79,
+    "proto": "tcp",
+    "service": "finger",
+    "name": "Finger Protocol",
+    "desc": "User status and information protocol",
+    "risk": "Medium",
+    "notes": "Information disclosure of logged-in user accounts, email addresses, and home directories."
+  },
+  {
+    "port": 80,
+    "proto": "tcp",
+    "service": "http",
+    "name": "HTTP Web Server",
+    "desc": "Hypertext Transfer Protocol (Cleartext)",
+    "risk": "Medium",
+    "notes": "Unencrypted web traffic. Susceptible to MITM, SQLi, XSS, CSRF, SSRF, command injection, and file inclusions."
+  },
+  {
+    "port": 88,
+    "proto": "tcp/udp",
+    "service": "kerberos",
+    "name": "Kerberos v5",
+    "desc": "Active Directory / Kerberos authentication",
+    "risk": "High",
+    "notes": "Kerberoasting, AS-REP roasting, Golden and Silver Ticket forge attacks, and DCSync replication."
+  },
+  {
+    "port": 102,
+    "proto": "tcp",
+    "service": "iso-tsap",
+    "name": "ISO-TSAP / Siemens S7",
+    "desc": "Industrial control systems & SCADA",
+    "risk": "Critical",
+    "notes": "Siemens S7 PLC communication. Target for Stuxnet-like ICS tampering and ladder logic manipulation."
+  },
+  {
+    "port": 110,
+    "proto": "tcp",
+    "service": "pop3",
+    "name": "POP3 Mail",
+    "desc": "Post Office Protocol version 3",
+    "risk": "High",
+    "notes": "Sends passwords in cleartext without TLS. Subject to eavesdropping and credential stuffing."
+  },
+  {
+    "port": 111,
+    "proto": "tcp/udp",
+    "service": "rpcbind",
+    "name": "RPCbind / Portmapper",
+    "desc": "Sun RPC service locator",
+    "risk": "High",
+    "notes": "Exposes running RPC programs like NFS, NIS, mountd. Target for RPC amplification DDoS attacks."
+  },
+  {
+    "port": 113,
+    "proto": "tcp",
+    "service": "ident",
+    "name": "Ident / Auth",
+    "desc": "Identification Protocol",
+    "risk": "Low",
+    "notes": "Discloses username running specific TCP connections."
+  },
+  {
+    "port": 119,
+    "proto": "tcp",
+    "service": "nntp",
+    "name": "NNTP",
+    "desc": "Network News Transfer Protocol",
+    "risk": "Low",
+    "notes": "Usenet articles distribution."
+  },
+  {
+    "port": 123,
+    "proto": "udp",
+    "service": "ntp",
+    "name": "NTP (Network Time)",
+    "desc": "Network Time Protocol clock synchronization",
+    "risk": "Medium",
+    "notes": "NTP monlist reflection attacks (DDoS) and rogue time injection affecting TLS certificate verification."
+  },
+  {
+    "port": 135,
+    "proto": "tcp",
+    "service": "msrpc",
+    "name": "Microsoft RPC / EPMAP",
+    "desc": "Windows Endpoint Mapper",
+    "risk": "High",
+    "notes": "Windows remote RPC and DCOM. Historically exploited by Blaster worm; used for remote enumeration and WMI execution."
+  },
+  {
+    "port": 137,
+    "proto": "udp",
+    "service": "netbios-ns",
+    "name": "NetBIOS Name Service",
+    "desc": "Windows NetBIOS name registration/lookup",
+    "risk": "High",
+    "notes": "Target for LLMNR / NBT-NS poisoning attacks via Responder to capture NTLMv2 hashes."
+  },
+  {
+    "port": 138,
+    "proto": "udp",
+    "service": "netbios-dgm",
+    "name": "NetBIOS Datagram",
+    "desc": "Windows NetBIOS browser service",
+    "risk": "Medium",
+    "notes": "Broadcast datagram traffic for Windows workgroups."
+  },
+  {
+    "port": 139,
+    "proto": "tcp",
+    "service": "netbios-ssn",
+    "name": "NetBIOS Session",
+    "desc": "File and print sharing over NetBIOS",
+    "risk": "High",
+    "notes": "Older SMB implementation. Check for null session login, share listing, and user account enumeration."
+  },
+  {
+    "port": 143,
+    "proto": "tcp",
+    "service": "imap",
+    "name": "IMAP4 Mail",
+    "desc": "Internet Message Access Protocol",
+    "risk": "High",
+    "notes": "Cleartext email access without TLS. Subject to sniffing, brute-force, and credential harvesting."
+  },
+  {
+    "port": 161,
+    "proto": "udp",
+    "service": "snmp",
+    "name": "SNMP (Agent)",
+    "desc": "Simple Network Management Protocol queries",
+    "risk": "High",
+    "notes": "Default community strings ('public', 'private') allow dumping running processes, network interfaces, and configs."
+  },
+  {
+    "port": 162,
+    "proto": "udp",
+    "service": "snmptrap",
+    "name": "SNMP Trap",
+    "desc": "SNMP event notifications",
+    "risk": "Medium",
+    "notes": "Receives unsolicited alerts from network hardware."
+  },
+  {
+    "port": 177,
+    "proto": "udp",
+    "service": "xdmcp",
+    "name": "XDMCP",
+    "desc": "X Display Manager Control Protocol",
+    "risk": "High",
+    "notes": "Allows remote X11 desktop login. Unencrypted authentication."
+  },
+  {
+    "port": 179,
+    "proto": "tcp",
+    "service": "bgp",
+    "name": "BGP (Border Gateway)",
+    "desc": "Core Internet routing protocol",
+    "risk": "Critical",
+    "notes": "Vulnerable to BGP route hijacking, prefix de-aggregation, and DDoS attacks without MD5 authentication."
+  },
+  {
+    "port": 194,
+    "proto": "tcp",
+    "service": "irc",
+    "name": "IRC (Internet Relay Chat)",
+    "desc": "Multi-user text chat protocol",
+    "risk": "Medium",
+    "notes": "Frequently leveraged by threat actors for botnet Command and Control (C2)."
+  },
+  {
+    "port": 264,
+    "proto": "tcp",
+    "service": "bgmp",
+    "name": "Border Gateway Multicast",
+    "desc": "Multicast routing protocol",
+    "risk": "Low",
+    "notes": "Routing protocol infrastructure."
+  },
+  {
+    "port": 389,
+    "proto": "tcp/udp",
+    "service": "ldap",
+    "name": "LDAP Directory",
+    "desc": "Lightweight Directory Access Protocol",
+    "risk": "High",
+    "notes": "Active Directory directory service. Anonymous bind may dump full directory structure, users, and groups."
+  },
+  {
+    "port": 443,
+    "proto": "tcp",
+    "service": "https",
+    "name": "HTTPS (HTTP over TLS)",
+    "desc": "Secure web communications",
+    "risk": "Low",
+    "notes": "Encrypted web traffic. Check certificate expiry, weak ciphers, TLS 1.0/1.1 deprecation, and web vulnerabilities."
+  },
+  {
+    "port": 445,
+    "proto": "tcp",
+    "service": "microsoft-ds",
+    "name": "SMB over TCP/IP",
+    "desc": "Direct host Windows file and share access",
+    "risk": "Critical",
+    "notes": "Primary target for Windows exploitation! EternalBlue (MS17-010), SMBGhost (CVE-2020-0796), PsExec, and NTLM relaying."
+  },
+  {
+    "port": 465,
+    "proto": "tcp",
+    "service": "smtps",
+    "name": "SMTPS (SMTP over SSL)",
+    "desc": "Secure mail submission/transfer",
+    "risk": "Low",
+    "notes": "Deprecated legacy SMTPS; verify modern TLS 1.2+ configuration."
+  },
+  {
+    "port": 500,
+    "proto": "udp",
+    "service": "isakmp",
+    "name": "IKE / ISAKMP VPN",
+    "desc": "IPSec key exchange protocol",
+    "risk": "Medium",
+    "notes": "Aggressive mode IKE allows capturing pre-shared key (PSK) hashes for offline cracking via ike-scan."
+  },
+  {
+    "port": 512,
+    "proto": "tcp",
+    "service": "rexec",
+    "name": "Remote Execution",
+    "desc": "Legacy Unix remote execution",
+    "risk": "Critical",
+    "notes": "Cleartext passwords; legacy insecure remote execution."
+  },
+  {
+    "port": 513,
+    "proto": "tcp",
+    "service": "rlogin",
+    "name": "Remote Login",
+    "desc": "Legacy Unix remote terminal",
+    "risk": "Critical",
+    "notes": "Trusted hosts (.rhosts) authentication bypass allows root access with zero credentials."
+  },
+  {
+    "port": 514,
+    "proto": "tcp/udp",
+    "service": "syslog / rsh",
+    "name": "Syslog / Remote Shell",
+    "desc": "System log messages or remote shell",
+    "risk": "High",
+    "notes": "Syslog over UDP is spoofable and unencrypted; RSH allows cleartext unauthenticated remote commands."
+  },
+  {
+    "port": 515,
+    "proto": "tcp",
+    "service": "lpd",
+    "name": "Line Printer Daemon",
+    "desc": "Network printing protocol",
+    "risk": "Medium",
+    "notes": "Legacy printing service; buffer overflows in historical implementations."
+  },
+  {
+    "port": 520,
+    "proto": "udp",
+    "service": "rip",
+    "name": "Routing Information Protocol",
+    "desc": "Distance-vector routing",
+    "risk": "High",
+    "notes": "Allows injecting unauthorized routes into routing table without authentication."
+  },
+  {
+    "port": 548,
+    "proto": "tcp",
+    "service": "afp",
+    "name": "Apple Filing Protocol",
+    "desc": "Apple network file sharing",
+    "risk": "Medium",
+    "notes": "Apple AFP shares; check for guest access and credential brute force."
+  },
+  {
+    "port": 554,
+    "proto": "tcp/udp",
+    "service": "rtsp",
+    "name": "RTSP Streaming",
+    "desc": "Real-Time Streaming Protocol (IP cameras)",
+    "risk": "High",
+    "notes": "IP surveillance cameras and NVR streams. Often unprotected or uses default vendor credentials."
+  },
+  {
+    "port": 587,
+    "proto": "tcp",
+    "service": "submission",
+    "name": "SMTP Message Submission",
+    "desc": "Authenticated outbound email submission",
+    "risk": "Low",
+    "notes": "Modern mail sending port; requires STARTTLS and SMTP authentication."
+  },
+  {
+    "port": 623,
+    "proto": "udp",
+    "service": "ipmi",
+    "name": "IPMI / RMCP Remote Mgmt",
+    "desc": "Intelligent Platform Management Interface",
+    "risk": "Critical",
+    "notes": "IPMI 2.0 RAKP hash retrieval allows offline cracking of BMC/iDRAC passwords, granting full lights-out bare metal server control."
+  },
+  {
+    "port": 631,
+    "proto": "tcp/udp",
+    "service": "ipp",
+    "name": "CUPS Printing System",
+    "desc": "Common Unix Printing System",
+    "risk": "High",
+    "notes": "Check for CUPS RCE (CVE-2024-47176 / CVE-2024-47177). Exposes web administration interface."
+  },
+  {
+    "port": 636,
+    "proto": "tcp",
+    "service": "ldaps",
+    "name": "LDAP over TLS/SSL",
+    "desc": "Secure directory services",
+    "risk": "Medium",
+    "notes": "Encrypted Active Directory queries. Inspect certificate for internal domain naming leaks."
+  },
+  {
+    "port": 853,
+    "proto": "tcp",
+    "service": "dot",
+    "name": "DNS over TLS (DoT)",
+    "desc": "Encrypted domain resolution",
+    "risk": "Low",
+    "notes": "Protects against ISP DNS snooping and tampering."
+  },
+  {
+    "port": 873,
+    "proto": "tcp",
+    "service": "rsync",
+    "name": "Rsync Daemon",
+    "desc": "Fast remote file copy and synchronization",
+    "risk": "High",
+    "notes": "Unauthenticated rsync modules permit arbitrary file read/write, SSH key overwriting, and system compromise."
+  },
+  {
+    "port": 902,
+    "proto": "tcp",
+    "service": "vmware-auth",
+    "name": "VMware Server Auth",
+    "desc": "VMware ESXi host agent authentication",
+    "risk": "Medium",
+    "notes": "Hypervisor management interface. Brute force target."
+  },
+  {
+    "port": 990,
+    "proto": "tcp",
+    "service": "ftps",
+    "name": "FTPS (FTP over SSL)",
+    "desc": "Encrypted file transfer",
+    "risk": "Low",
+    "notes": "Encrypted FTP control connection."
+  },
+  {
+    "port": 993,
+    "proto": "tcp",
+    "service": "imaps",
+    "name": "IMAP over SSL",
+    "desc": "Secure email retrieval",
+    "risk": "Low",
+    "notes": "Standard encrypted email mailbox protocol."
+  },
+  {
+    "port": 995,
+    "proto": "tcp",
+    "service": "pop3s",
+    "name": "POP3 over SSL",
+    "desc": "Secure Post Office Protocol",
+    "risk": "Low",
+    "notes": "Standard encrypted POP3 retrieval."
+  },
+  {
+    "port": 1080,
+    "proto": "tcp",
+    "service": "socks",
+    "name": "SOCKS Proxy",
+    "desc": "SOCKS v4 / v5 proxy service",
+    "risk": "High",
+    "notes": "Open proxies allow attackers to bounce attacks, pivot into internal subnets, and bypass firewalls."
+  },
+  {
+    "port": 1194,
+    "proto": "udp/tcp",
+    "service": "openvpn",
+    "name": "OpenVPN",
+    "desc": "OpenVPN encrypted tunnel",
+    "risk": "Low",
+    "notes": "Secure virtual private network. Requires TLS keys or username/password."
+  },
+  {
+    "port": 1352,
+    "proto": "tcp",
+    "service": "lotusnotes",
+    "name": "Lotus Domino / Notes",
+    "desc": "IBM Lotus Notes remote database",
+    "risk": "Medium",
+    "notes": "Discloses internal Domino database names and user address books."
+  },
+  {
+    "port": 1433,
+    "proto": "tcp",
+    "service": "ms-sql-s",
+    "name": "Microsoft SQL Server",
+    "desc": "MSSQL relational database engine",
+    "risk": "High",
+    "notes": "Sa account brute force, xp_cmdshell command execution, database dump, and lateral movement."
+  },
+  {
+    "port": 1434,
+    "proto": "udp",
+    "service": "ms-sql-m",
+    "name": "MSSQL Browser Service",
+    "desc": "Discovers MSSQL named instances",
+    "risk": "High",
+    "notes": "Discloses named instances, port mappings, and version numbers. SQL Slammer vector."
+  },
+  {
+    "port": 1521,
+    "proto": "tcp",
+    "service": "oracle-tns",
+    "name": "Oracle TNS Listener",
+    "desc": "Oracle Database listener",
+    "risk": "High",
+    "notes": "SID guessing, default accounts (scott/tiger, system), TNS poison attacks."
+  },
+  {
+    "port": 1701,
+    "proto": "udp",
+    "service": "l2tp",
+    "name": "L2TP VPN",
+    "desc": "Layer 2 Tunneling Protocol",
+    "risk": "Medium",
+    "notes": "Legacy VPN tunneling without intrinsic encryption (relies on IPSec)."
+  },
+  {
+    "port": 1720,
+    "proto": "tcp",
+    "service": "h323",
+    "name": "H.323 Video/VoIP",
+    "desc": "H.323 call signaling protocol",
+    "risk": "Medium",
+    "notes": "VoIP and video conference gatekeeper."
+  },
+  {
+    "port": 1723,
+    "proto": "tcp",
+    "service": "pptp",
+    "name": "PPTP VPN",
+    "desc": "Point-to-Point Tunneling Protocol",
+    "risk": "High",
+    "notes": "Severely broken MS-CHAPv2 encryption; easily cracked offline via dictionary or rainbow tables."
+  },
+  {
+    "port": 1883,
+    "proto": "tcp",
+    "service": "mqtt",
+    "name": "MQTT (IoT Messaging)",
+    "desc": "Lightweight publish/subscribe protocol",
+    "risk": "High",
+    "notes": "IoT telemetry protocol. Often left unauthenticated, exposing smart home, industrial sensor, and GPS streams."
+  },
+  {
+    "port": 1900,
+    "proto": "udp",
+    "service": "ssdp / upnp",
+    "name": "SSDP / UPnP",
+    "desc": "Simple Service Discovery Protocol",
+    "risk": "High",
+    "notes": "UPnP reflection DDoS amplification and unauthorized port-mapping injection from LAN."
+  },
+  {
+    "port": 1935,
+    "proto": "tcp",
+    "service": "rtmp",
+    "name": "RTMP Video Streaming",
+    "desc": "Real-Time Messaging Protocol",
+    "risk": "Low",
+    "notes": "Live video streaming (Flash/OBS/Twitch/YouTube ingest)."
+  },
+  {
+    "port": 1936,
+    "proto": "tcp",
+    "service": "haproxy-stats",
+    "name": "HAProxy Statistics",
+    "desc": "HAProxy load balancer dashboard",
+    "risk": "Medium",
+    "notes": "Check for default stats credentials (admin/admin or stats/stats); leaks backend servers."
+  },
+  {
+    "port": 2049,
+    "proto": "tcp/udp",
+    "service": "nfs",
+    "name": "NFS (Network File System)",
+    "desc": "Unix/Linux file sharing",
+    "risk": "Critical",
+    "notes": "Misconfigured exports with no_root_squash give instant root RCE upon mounting."
+  },
+  {
+    "port": 2082,
+    "proto": "tcp",
+    "service": "cpanel-http",
+    "name": "cPanel Web Hosting",
+    "desc": "cPanel web hosting panel (HTTP)",
+    "risk": "Medium",
+    "notes": "Cleartext hosting administration panel. Brute force target."
+  },
+  {
+    "port": 2083,
+    "proto": "tcp",
+    "service": "cpanel-https",
+    "name": "cPanel Web Hosting (SSL)",
+    "desc": "cPanel web hosting panel (SSL)",
+    "risk": "Low",
+    "notes": "Secure hosting administration interface."
+  },
+  {
+    "port": 2086,
+    "proto": "tcp",
+    "service": "whm-http",
+    "name": "WHM (Web Host Manager)",
+    "desc": "cPanel WebHost Manager cleartext",
+    "risk": "High",
+    "notes": "Cleartext server hosting administration interface."
+  },
+  {
+    "port": 2087,
+    "proto": "tcp",
+    "service": "whm-https",
+    "name": "WHM HTTPS",
+    "desc": "cPanel WebHost Manager over TLS",
+    "risk": "Medium",
+    "notes": "Encrypted hosting control panel."
+  },
+  {
+    "port": 2181,
+    "proto": "tcp",
+    "service": "zookeeper",
+    "name": "Apache ZooKeeper",
+    "desc": "Distributed coordination service",
+    "risk": "High",
+    "notes": "Accepts 4-letter commands ('envi', 'stat', 'dump') without authentication. Leaks internal topology."
+  },
+  {
+    "port": 2222,
+    "proto": "tcp",
+    "service": "ssh-alt",
+    "name": "SSH Alternate / DirectAdmin",
+    "desc": "Alternate SSH port or DirectAdmin panel",
+    "risk": "Medium",
+    "notes": "Frequently used as alternate port for SSH to obscure from botnet scanners."
+  },
+  {
+    "port": 2375,
+    "proto": "tcp",
+    "service": "docker",
+    "name": "Docker Daemon (Insecure)",
+    "desc": "Docker REST API (Plaintext)",
+    "risk": "Critical",
+    "notes": "EXTREME RISK! Unauthenticated Docker daemon socket yields immediate root command execution on the host."
+  },
+  {
+    "port": 2376,
+    "proto": "tcp",
+    "service": "docker-tls",
+    "name": "Docker Daemon (TLS)",
+    "desc": "Docker REST API (Client TLS authenticated)",
+    "risk": "Medium",
+    "notes": "Secured Docker API. Check for weak client certificate enforcement."
+  },
+  {
+    "port": 2379,
+    "proto": "tcp",
+    "service": "etcd-client",
+    "name": "etcd Client API",
+    "desc": "Kubernetes distributed key-value store",
+    "risk": "Critical",
+    "notes": "Contains complete Kubernetes cluster state and secrets. Unauthenticated access = complete cluster takeover."
+  },
+  {
+    "port": 2380,
+    "proto": "tcp",
+    "service": "etcd-peer",
+    "name": "etcd Cluster Peer",
+    "desc": "Kubernetes etcd peer communication",
+    "risk": "High",
+    "notes": "Peer synchronization protocol."
+  },
+  {
+    "port": 2483,
+    "proto": "tcp",
+    "service": "oracle-tcps",
+    "name": "Oracle TCPS",
+    "desc": "Oracle database listener over SSL",
+    "risk": "Medium",
+    "notes": "Encrypted Oracle database connection."
+  },
+  {
+    "port": 3000,
+    "proto": "tcp",
+    "service": "grafana / node",
+    "name": "Grafana / Node.js Dev",
+    "desc": "Dev server or Grafana dashboard",
+    "risk": "Medium",
+    "notes": "Default credentials (admin/admin), path traversal CVE-2021-43798, and development API endpoints."
+  },
+  {
+    "port": 3050,
+    "proto": "tcp",
+    "service": "firebird",
+    "name": "Firebird Database",
+    "desc": "Firebird / InterBase relational database",
+    "risk": "Medium",
+    "notes": "Default credentials (SYSDBA/masterkey)."
+  },
+  {
+    "port": 3128,
+    "proto": "tcp",
+    "service": "squid-proxy",
+    "name": "Squid HTTP Proxy",
+    "desc": "Caching web proxy server",
+    "risk": "Medium",
+    "notes": "Check for open proxy abuse and SSRF relaying into internal cloud metadata IP (169.254.169.254)."
+  },
+  {
+    "port": 3268,
+    "proto": "tcp",
+    "service": "ms-gc",
+    "name": "Active Directory Global Catalog",
+    "desc": "Microsoft Global Catalog LDAP query",
+    "risk": "High",
+    "notes": "Forest-wide LDAP search port for Active Directory."
+  },
+  {
+    "port": 3269,
+    "proto": "tcp",
+    "service": "ms-gc-ssl",
+    "name": "Active Directory GC SSL",
+    "desc": "Global Catalog over SSL/TLS",
+    "risk": "Medium",
+    "notes": "Encrypted forest search."
+  },
+  {
+    "port": 3306,
+    "proto": "tcp",
+    "service": "mysql",
+    "name": "MySQL / MariaDB",
+    "desc": "Relational database server",
+    "risk": "High",
+    "notes": "Brute force root accounts, default empty passwords, UDF library injection for root OS command execution."
+  },
+  {
+    "port": 3389,
+    "proto": "tcp/udp",
+    "service": "rdp",
+    "name": "Remote Desktop (RDP)",
+    "desc": "Microsoft Remote Desktop Protocol",
+    "risk": "High",
+    "notes": "BlueKeep (CVE-2019-0708), DejaBlue, NLA bypass, brute-force credential attacks, and ransomware delivery."
+  },
+  {
+    "port": 3478,
+    "proto": "udp/tcp",
+    "service": "stun",
+    "name": "STUN / TURN NAT Traversal",
+    "desc": "Session Traversal Utilities for NAT",
+    "risk": "Low",
+    "notes": "Assists VoIP/WebRTC clients discover public IP mapping."
+  },
+  {
+    "port": 3690,
+    "proto": "tcp/udp",
+    "service": "svn",
+    "name": "Subversion (SVN)",
+    "desc": "Apache Subversion source control",
+    "risk": "Medium",
+    "notes": "Source code repository. Check for anonymous read access to proprietary software."
+  },
+  {
+    "port": 3702,
+    "proto": "udp",
+    "service": "ws-discovery",
+    "name": "WS-Discovery",
+    "desc": "Web Services Dynamic Discovery for ONVIF/IP cameras",
+    "risk": "High",
+    "notes": "Heavily exploited for high-magnitude UDP reflection DDoS attacks."
+  },
+  {
+    "port": 4000,
+    "proto": "tcp",
+    "service": "hexo / dev",
+    "name": "Static Web / Dev Server",
+    "desc": "Node / Hexo / Go development server",
+    "risk": "Low",
+    "notes": "Local development server exposed externally."
+  },
+  {
+    "port": 4040,
+    "proto": "tcp",
+    "service": "spark-ui / ngrok",
+    "name": "Apache Spark UI / ngrok Web",
+    "desc": "Spark application dashboard or local ngrok web UI",
+    "risk": "Medium",
+    "notes": "Leaks internal cluster tasks or exposes ngrok tunnel endpoints."
+  },
+  {
+    "port": 4242,
+    "proto": "tcp",
+    "service": "opentsdb",
+    "name": "OpenTSDB",
+    "desc": "Time series database",
+    "risk": "Medium",
+    "notes": "Unauthenticated metric injection."
+  },
+  {
+    "port": 4369,
+    "proto": "tcp",
+    "service": "epmd",
+    "name": "Erlang Port Mapper (EPMD)",
+    "desc": "Erlang Port Mapper Daemon",
+    "risk": "High",
+    "notes": "Used by RabbitMQ and Erlang clusters. Discloses Erlang node names; Erlang cookie brute force yields RCE."
+  },
+  {
+    "port": 4443,
+    "proto": "tcp",
+    "service": "https-alt",
+    "name": "PharLap / Alternate HTTPS",
+    "desc": "Alternate HTTPS web server or VPN",
+    "risk": "Medium",
+    "notes": "Frequently used by SSL VPN gateways (e.g. Fortinet, Pulse Secure) or self-hosted web apps."
+  },
+  {
+    "port": 4444,
+    "proto": "tcp",
+    "service": "metasploit",
+    "name": "Metasploit Reverse Shell",
+    "desc": "Default Metasploit payload listener",
+    "risk": "Critical",
+    "notes": "Iconic Metasploit default listener port. If listening, strongly indicates a reverse shell or active compromise."
+  },
+  {
+    "port": 4500,
+    "proto": "udp",
+    "service": "ipsec-nat-t",
+    "name": "IPSec NAT Traversal",
+    "desc": "IPSec NAT-T encapsulation",
+    "risk": "Medium",
+    "notes": "Encapsulates IPSec ESP packets over UDP to traverse NAT firewalls."
+  },
+  {
+    "port": 4505,
+    "proto": "tcp",
+    "service": "salt-pub",
+    "name": "SaltStack Publisher",
+    "desc": "Salt Master publisher",
+    "risk": "Critical",
+    "notes": "SaltStack authentication bypass and directory traversal (CVE-2020-11651 / CVE-2020-11652) gave instant root RCE."
+  },
+  {
+    "port": 4506,
+    "proto": "tcp",
+    "service": "salt-req",
+    "name": "SaltStack Request",
+    "desc": "Salt Master request server",
+    "risk": "Critical",
+    "notes": "Salt master remote control protocol."
+  },
+  {
+    "port": 4646,
+    "proto": "tcp",
+    "service": "nomad-http",
+    "name": "HashiCorp Nomad HTTP",
+    "desc": "Nomad workload orchestrator API",
+    "risk": "Critical",
+    "notes": "Unauthenticated Nomad API gives full job deployment and root container execution."
+  },
+  {
+    "port": 4647,
+    "proto": "tcp",
+    "service": "nomad-rpc",
+    "name": "Nomad RPC",
+    "desc": "Nomad cluster internal communication",
+    "risk": "High",
+    "notes": "Nomad cluster RPC."
+  },
+  {
+    "port": 5000,
+    "proto": "tcp",
+    "service": "flask / docker-reg",
+    "name": "Flask / Docker Registry",
+    "desc": "Python Flask app or private Docker registry",
+    "risk": "Medium",
+    "notes": "Flask debug mode Werkzeug console PIN exploit yields RCE; Docker registry may leak proprietary container images."
+  },
+  {
+    "port": 5001,
+    "proto": "tcp",
+    "service": "synology-dsm-ssl",
+    "name": "Synology DSM (SSL)",
+    "desc": "Synology NAS management UI",
+    "risk": "Medium",
+    "notes": "Target for NAS ransomware and admin credential stuffing."
+  },
+  {
+    "port": 5060,
+    "proto": "tcp/udp",
+    "service": "sip",
+    "name": "SIP VoIP Signaling",
+    "desc": "Session Initiation Protocol",
+    "risk": "High",
+    "notes": "VoIP PBX systems (Asterisk/FreePBX). Target for toll fraud, eavesdropping, and extension enumeration."
+  },
+  {
+    "port": 5061,
+    "proto": "tcp",
+    "service": "sips",
+    "name": "SIP over TLS",
+    "desc": "Encrypted VoIP signaling",
+    "risk": "Low",
+    "notes": "Secure SIP signaling."
+  },
+  {
+    "port": 5182,
+    "proto": "udp",
+    "service": "wireguard-alt",
+    "name": "WireGuard Alt",
+    "desc": "WireGuard alternate port",
+    "risk": "Low",
+    "notes": "Modern VPN tunneling."
+  },
+  {
+    "port": 5222,
+    "proto": "tcp",
+    "service": "xmpp-client",
+    "name": "XMPP / Jabber Client",
+    "desc": "Extensible Messaging and Presence Protocol",
+    "risk": "Low",
+    "notes": "Instant messaging protocol."
+  },
+  {
+    "port": 5269,
+    "proto": "tcp",
+    "service": "xmpp-server",
+    "name": "XMPP Server-to-Server",
+    "desc": "Federated XMPP server communication",
+    "risk": "Low",
+    "notes": "Federation chat traffic."
+  },
+  {
+    "port": 5353,
+    "proto": "udp",
+    "service": "mdns",
+    "name": "mDNS / Bonjour",
+    "desc": "Multicast DNS local name resolution",
+    "risk": "Medium",
+    "notes": "Leaks local device names, OS, and services on the local subnet without authentication."
+  },
+  {
+    "port": 5432,
+    "proto": "tcp",
+    "service": "postgresql",
+    "name": "PostgreSQL Database",
+    "desc": "PostgreSQL relational database",
+    "risk": "High",
+    "notes": "Brute-force postgres user; `COPY ... FROM PROGRAM` allows direct operating system command execution."
+  },
+  {
+    "port": 5554,
+    "proto": "tcp",
+    "service": "sasser",
+    "name": "Sasser Worm FTP",
+    "desc": "Historic Sasser worm backdoor",
+    "risk": "Critical",
+    "notes": "Classic Windows LSASS exploit artifact."
+  },
+  {
+    "port": 5555,
+    "proto": "tcp",
+    "service": "adb",
+    "name": "Android ADB over Wi-Fi",
+    "desc": "Android Debug Bridge network daemon",
+    "risk": "Critical",
+    "notes": "Unauthenticated Android ADB gives instant root/shell access to the phone, screen mirroring, and APK install."
+  },
+  {
+    "port": 5556,
+    "proto": "tcp",
+    "service": "zeromq",
+    "name": "ZeroMQ Messaging",
+    "desc": "Distributed message queue",
+    "risk": "Medium",
+    "notes": "Fast distributed message transport."
+  },
+  {
+    "port": 5672,
+    "proto": "tcp",
+    "service": "amqp",
+    "name": "RabbitMQ / AMQP",
+    "desc": "Advanced Message Queuing Protocol",
+    "risk": "Medium",
+    "notes": "Default credentials (guest/guest), unauthenticated message ingestion, and queue snooping."
+  },
+  {
+    "port": 5683,
+    "proto": "udp",
+    "service": "coap",
+    "name": "CoAP (Constrained Application)",
+    "desc": "Constrained RESTful Environments IoT protocol",
+    "risk": "High",
+    "notes": "IoT protocol prone to UDP reflection amplification attacks."
+  },
+  {
+    "port": 5684,
+    "proto": "udp",
+    "service": "coaps",
+    "name": "CoAP over DTLS",
+    "desc": "Secure CoAP protocol with DTLS",
+    "risk": "Low",
+    "notes": "Encrypted IoT communications."
+  },
+  {
+    "port": 5900,
+    "proto": "tcp",
+    "service": "vnc-0",
+    "name": "VNC Display 0",
+    "desc": "Virtual Network Computing remote desktop",
+    "risk": "High",
+    "notes": "VNC null authentication, weak passwords, and cleartext keystroke capture."
+  },
+  {
+    "port": 5901,
+    "proto": "tcp",
+    "service": "vnc-1",
+    "name": "VNC Display 1",
+    "desc": "VNC remote desktop session 1",
+    "risk": "High",
+    "notes": "Secondary VNC screen display."
+  },
+  {
+    "port": 5984,
+    "proto": "tcp",
+    "service": "couchdb",
+    "name": "Apache CouchDB",
+    "desc": "NoSQL document database",
+    "risk": "High",
+    "notes": "Check for admin party mode (unauthenticated admin) and RCE (CVE-2017-12636 / CVE-2022-24706)."
+  },
+  {
+    "port": 5985,
+    "proto": "tcp",
+    "service": "winrm-http",
+    "name": "WinRM HTTP",
+    "desc": "Windows Remote Management (HTTP)",
+    "risk": "High",
+    "notes": "PowerShell remoting. Used by Evil-WinRM for initial access and lateral movement."
+  },
+  {
+    "port": 5986,
+    "proto": "tcp",
+    "service": "winrm-https",
+    "name": "WinRM HTTPS",
+    "desc": "Windows Remote Management (HTTPS)",
+    "risk": "Medium",
+    "notes": "Encrypted PowerShell remoting. Target for password spraying."
+  },
+  {
+    "port": 6000,
+    "proto": "tcp",
+    "service": "x11",
+    "name": "X11 Display Server",
+    "desc": "X Window System display :0",
+    "risk": "Critical",
+    "notes": "Unauthenticated X11 server allows keylogging, taking screenshots, and injecting keystrokes into open applications."
+  },
+  {
+    "port": 6001,
+    "proto": "tcp",
+    "service": "x11-1",
+    "name": "X11 Display 1",
+    "desc": "X11 display :1",
+    "risk": "Critical",
+    "notes": "Unauthenticated GUI display; keystroke sniffing and command injection."
+  },
+  {
+    "port": 6081,
+    "proto": "tcp",
+    "service": "varnish",
+    "name": "Varnish Cache",
+    "desc": "High performance HTTP accelerator/cache",
+    "risk": "Medium",
+    "notes": "HTTP reverse proxy cache."
+  },
+  {
+    "port": 6082,
+    "proto": "tcp",
+    "service": "varnish-cli",
+    "name": "Varnish Admin CLI",
+    "desc": "Varnish command line administration",
+    "risk": "High",
+    "notes": "Allows executing VCL scripts; VCL execution can lead to arbitrary code execution if unauthenticated."
+  },
+  {
+    "port": 6379,
+    "proto": "tcp",
+    "service": "redis",
+    "name": "Redis In-Memory Database",
+    "desc": "Redis key-value store",
+    "risk": "Critical",
+    "notes": "Often left exposed without password. Attacker can dump keys, write SSH authorized_keys, overwrite crontab, or achieve RCE via MODULE LOAD."
+  },
+  {
+    "port": 6432,
+    "proto": "tcp",
+    "service": "pgbouncer",
+    "name": "PgBouncer",
+    "desc": "PostgreSQL connection pooler",
+    "risk": "Medium",
+    "notes": "Check credentials and database connection limits."
+  },
+  {
+    "port": 6443,
+    "proto": "tcp",
+    "service": "kube-api",
+    "name": "Kubernetes API Server",
+    "desc": "Kubernetes Control Plane API",
+    "risk": "High",
+    "notes": "Exposes Kubernetes control plane. Check for anonymous auth and authorization misconfigurations."
+  },
+  {
+    "port": 6667,
+    "proto": "tcp",
+    "service": "irc",
+    "name": "IRC Default",
+    "desc": "Internet Relay Chat",
+    "risk": "Medium",
+    "notes": "Chat server; historic malware C2 communication channel."
+  },
+  {
+    "port": 6881,
+    "proto": "tcp/udp",
+    "service": "bittorrent",
+    "name": "BitTorrent Client",
+    "desc": "BitTorrent peer-to-peer file transfer",
+    "risk": "Low",
+    "notes": "P2P traffic; copyright and bandwidth concerns."
+  },
+  {
+    "port": 7000,
+    "proto": "tcp",
+    "service": "cassandra-intra",
+    "name": "Cassandra Cluster",
+    "desc": "Cassandra inter-node cluster communication",
+    "risk": "Medium",
+    "notes": "Internal cluster traffic."
+  },
+  {
+    "port": 7001,
+    "proto": "tcp",
+    "service": "weblogic",
+    "name": "Oracle WebLogic Console",
+    "desc": "Oracle WebLogic Server administration",
+    "risk": "Critical",
+    "notes": "Rife with Java deserialization RCEs (CVE-2020-14882, CVE-2023-21839). Highly sought by ransomware groups."
+  },
+  {
+    "port": 7077,
+    "proto": "tcp",
+    "service": "spark-master",
+    "name": "Apache Spark Master",
+    "desc": "Spark standalone cluster master",
+    "risk": "High",
+    "notes": "Submitting unauthenticated Spark jobs permits remote code execution."
+  },
+  {
+    "port": 7474,
+    "proto": "tcp",
+    "service": "neo4j-http",
+    "name": "Neo4j Graph Database (HTTP)",
+    "desc": "Neo4j web console and REST API",
+    "risk": "High",
+    "notes": "Default credentials (neo4j/neo4j), Cypher query injection."
+  },
+  {
+    "port": 7687,
+    "proto": "tcp",
+    "service": "neo4j-bolt",
+    "name": "Neo4j Bolt Protocol",
+    "desc": "Neo4j binary graph database connection",
+    "risk": "High",
+    "notes": "Binary protocol for database transactions."
+  },
+  {
+    "port": 7777,
+    "proto": "tcp/udp",
+    "service": "game-server / oracle-default",
+    "name": "Game Server / Oracle Cluster",
+    "desc": "Terraria / Unreal Tournament / Oracle cluster",
+    "risk": "Low",
+    "notes": "Online multiplayer server or Oracle service."
+  },
+  {
+    "port": 8000,
+    "proto": "tcp",
+    "service": "http-alt",
+    "name": "Common HTTP Alternate",
+    "desc": "Dev servers, Django, Python http.server",
+    "risk": "Medium",
+    "notes": "Internal APIs, unhardened development web servers, directory listings."
+  },
+  {
+    "port": 8006,
+    "proto": "tcp",
+    "service": "proxmox-ve",
+    "name": "Proxmox VE Web Management",
+    "desc": "Proxmox virtual environment GUI (HTTPS)",
+    "risk": "Medium",
+    "notes": "Hypervisor administration console. Brute force root."
+  },
+  {
+    "port": 8008,
+    "proto": "tcp",
+    "service": "http-alt",
+    "name": "HTTP Alternate",
+    "desc": "Alternate HTTP server / IBM HTTP",
+    "risk": "Medium",
+    "notes": "Alternative web port."
+  },
+  {
+    "port": 8080,
+    "proto": "tcp",
+    "service": "http-proxy",
+    "name": "Tomcat / Proxy / Spring",
+    "desc": "Apache Tomcat, Jenkins, Spring Boot",
+    "risk": "High",
+    "notes": "Tomcat /manager/html brute force, Jenkins unauthenticated Groovy script console RCE, Spring Boot actuator endpoints."
+  },
+  {
+    "port": 8081,
+    "proto": "tcp",
+    "service": "nexus / http",
+    "name": "Nexus / Black Duck / HTTP",
+    "desc": "Sonatype Nexus or alternate web",
+    "risk": "Medium",
+    "notes": "Default credentials (admin/admin123). Nexus repository RCE vulnerabilities."
+  },
+  {
+    "port": 8086,
+    "proto": "tcp",
+    "service": "influxdb",
+    "name": "InfluxDB API",
+    "desc": "Time-series database HTTP API",
+    "risk": "High",
+    "notes": "Unauthenticated time series queries and authentication bypass (CVE-2019-20933)."
+  },
+  {
+    "port": 8088,
+    "proto": "tcp",
+    "service": "hadoop-yarn",
+    "name": "Hadoop YARN ResourceManager",
+    "desc": "Hadoop cluster resource scheduler",
+    "risk": "Critical",
+    "notes": "Frequently exploited by crypto-miners! Unauthenticated REST API  allows direct RCE."
+  },
+  {
+    "port": 8089,
+    "proto": "tcp",
+    "service": "splunkd",
+    "name": "Splunk Management Daemon",
+    "desc": "Splunk enterprise management API (HTTPS)",
+    "risk": "Medium",
+    "notes": "Target for credential spraying and log ingestion tampering."
+  },
+  {
+    "port": 8111,
+    "proto": "tcp",
+    "service": "teamcity",
+    "name": "JetBrains TeamCity",
+    "desc": "CI/CD continuous integration server",
+    "risk": "Critical",
+    "notes": "Critical auth bypass RCEs (CVE-2023-42793 / CVE-2024-27198) heavily exploited for supply chain compromise."
+  },
+  {
+    "port": 8123,
+    "proto": "tcp",
+    "service": "clickhouse / homeassistant",
+    "name": "ClickHouse HTTP / Home Assistant",
+    "desc": "ClickHouse analytics database or Home Assistant IoT",
+    "risk": "Medium",
+    "notes": "Home automation or analytics query access."
+  },
+  {
+    "port": 8200,
+    "proto": "tcp",
+    "service": "vault",
+    "name": "HashiCorp Vault",
+    "desc": "Secrets and encryption management API",
+    "risk": "Critical",
+    "notes": "Holds all organization secrets, tokens, and certificates. High-value target for lateral movement."
+  },
+  {
+    "port": 8291,
+    "proto": "tcp",
+    "service": "winbox",
+    "name": "MikroTik WinBox",
+    "desc": "MikroTik RouterOS WinBox management",
+    "risk": "High",
+    "notes": "MikroTik RouterOS WinBox directory traversal (CVE-2018-14847) allowed retrieving admin credentials."
+  },
+  {
+    "port": 8388,
+    "proto": "tcp/udp",
+    "service": "shadowsocks",
+    "name": "Shadowsocks Proxy",
+    "desc": "Encrypted SOCKS5 tunneling proxy",
+    "risk": "Medium",
+    "notes": "Circumvention and censorship bypass proxy."
+  },
+  {
+    "port": 8443,
+    "proto": "tcp",
+    "service": "https-alt",
+    "name": "HTTPS Alternate",
+    "desc": "Apache Tomcat SSL, UniFi Controller, Plesk",
+    "risk": "Medium",
+    "notes": "Encrypted administrative consoles."
+  },
+  {
+    "port": 8500,
+    "proto": "tcp",
+    "service": "consul",
+    "name": "HashiCorp Consul",
+    "desc": "Consul service mesh and key-value store",
+    "risk": "Critical",
+    "notes": "Consul service registration with script checks enables remote command execution on the agent."
+  },
+  {
+    "port": 8501,
+    "proto": "tcp",
+    "service": "streamlit / consul-tls",
+    "name": "Streamlit / Consul TLS",
+    "desc": "Python Streamlit app or secure Consul",
+    "risk": "Medium",
+    "notes": "Interactive data app or Consul service mesh."
+  },
+  {
+    "port": 8880,
+    "proto": "tcp",
+    "service": "cpanel-webmail / plesk",
+    "name": "Plesk HTTP / cPanel Webmail",
+    "desc": "Hosting webmail or Plesk HTTP",
+    "risk": "Medium",
+    "notes": "Cleartext hosting webmail."
+  },
+  {
+    "port": 8883,
+    "proto": "tcp",
+    "service": "mqtt-tls",
+    "name": "MQTT over TLS",
+    "desc": "Secure IoT pub/sub message broker",
+    "risk": "Low",
+    "notes": "Encrypted IoT telemetry."
+  },
+  {
+    "port": 8888,
+    "proto": "tcp",
+    "service": "jupyter",
+    "name": "Jupyter Notebook / Web Admin",
+    "desc": "Data science Jupyter or Fiddler proxy",
+    "risk": "Critical",
+    "notes": "Jupyter notebooks without token allow instant shell execution in the browser as the host user."
+  },
+  {
+    "port": 9000,
+    "proto": "tcp",
+    "service": "php-fpm / portainer",
+    "name": "PHP-FPM / Portainer / SonarQube",
+    "desc": "FastCGI manager or Portainer Docker UI",
+    "risk": "High",
+    "notes": "Exposed PHP-FPM allows arbitrary command execution via FastCGI protocol injection."
+  },
+  {
+    "port": 9001,
+    "proto": "tcp",
+    "service": "supervisord / tor / minio",
+    "name": "Supervisor / MinIO Console / Tor",
+    "desc": "Supervisord XML-RPC or MinIO web console",
+    "risk": "High",
+    "notes": "Supervisord XML-RPC command execution (CVE-2017-11610); MinIO admin console."
+  },
+  {
+    "port": 9042,
+    "proto": "tcp",
+    "service": "cassandra",
+    "name": "Apache Cassandra CQL",
+    "desc": "Cassandra native CQL binary protocol",
+    "risk": "High",
+    "notes": "Default credentials (cassandra/cassandra) or unauthenticated NoSQL database queries."
+  },
+  {
+    "port": 9050,
+    "proto": "tcp",
+    "service": "tor-socks",
+    "name": "Tor SOCKS Proxy",
+    "desc": "The Onion Router local SOCKS5 proxy",
+    "risk": "Low",
+    "notes": "Anonymity network local routing gateway."
+  },
+  {
+    "port": 9051,
+    "proto": "tcp",
+    "service": "tor-control",
+    "name": "Tor Control Port",
+    "desc": "Tor daemon control interface",
+    "risk": "High",
+    "notes": "Unauthenticated control port allows instructing Tor daemon to create hidden services and reconfigure."
+  },
+  {
+    "port": 9090,
+    "proto": "tcp",
+    "service": "prometheus / cockpit",
+    "name": "Prometheus / Cockpit Web",
+    "desc": "Prometheus metrics or Linux web admin",
+    "risk": "Medium",
+    "notes": "Metrics reveal complete internal network topology, microservices, and host stats."
+  },
+  {
+    "port": 9092,
+    "proto": "tcp",
+    "service": "kafka",
+    "name": "Apache Kafka Broker",
+    "desc": "Distributed event streaming broker",
+    "risk": "High",
+    "notes": "Unauthenticated Kafka brokers permit sniffing events, topic modification, and data corruption."
+  },
+  {
+    "port": 9100,
+    "proto": "tcp",
+    "service": "node-exporter",
+    "name": "Prometheus Node Exporter",
+    "desc": "Host system hardware & OS metrics",
+    "risk": "Medium",
+    "notes": "Leaks CPU, memory, mount points, network interfaces, and system uptime."
+  },
+  {
+    "port": 9200,
+    "proto": "tcp",
+    "service": "elasticsearch",
+    "name": "Elasticsearch REST API",
+    "desc": "Elasticsearch search and analytics engine",
+    "risk": "Critical",
+    "notes": "Massive source of public data breaches. Unauthenticated cluster access allows dumping all indexed data, deleting indices, and RCE via Log4j."
+  },
+  {
+    "port": 9300,
+    "proto": "tcp",
+    "service": "elastic-cluster",
+    "name": "Elasticsearch Node-to-Node",
+    "desc": "Internal Elasticsearch cluster transport",
+    "risk": "High",
+    "notes": "Internal node communication."
+  },
+  {
+    "port": 9418,
+    "proto": "tcp",
+    "service": "git",
+    "name": "Git Protocol",
+    "desc": "Unauthenticated Git daemon transfer",
+    "risk": "Medium",
+    "notes": "Anonymous clone access to Git repositories."
+  },
+  {
+    "port": 9443,
+    "proto": "tcp",
+    "service": "portainer-ssl / wso2",
+    "name": "Portainer SSL / WSO2 Admin",
+    "desc": "Encrypted container manager or API gateway",
+    "risk": "Medium",
+    "notes": "Administrative web console over HTTPS."
+  },
+  {
+    "port": 9870,
+    "proto": "tcp",
+    "service": "hadoop-hdfs-name",
+    "name": "Hadoop HDFS NameNode",
+    "desc": "Hadoop 3.x HDFS NameNode Web UI",
+    "risk": "High",
+    "notes": "Exposes complete big-data distributed filesystem structure, directories, and data blocks."
+  },
+  {
+    "port": 9997,
+    "proto": "tcp",
+    "service": "splunk-forwarder",
+    "name": "Splunk Universal Forwarder",
+    "desc": "Splunk log ingestion receiver",
+    "risk": "Medium",
+    "notes": "Receives system audit logs from forwarders."
+  },
+  {
+    "port": 9999,
+    "proto": "tcp",
+    "service": "urchin / backdoor",
+    "name": "Urchin / Metasploit payload",
+    "desc": "Urchin web analytics or backdoor listener",
+    "risk": "High",
+    "notes": "Frequently used as alternate port for reverse shells."
+  },
+  {
+    "port": 10000,
+    "proto": "tcp",
+    "service": "webmin",
+    "name": "Webmin System Administration",
+    "desc": "Web-based Unix system administration",
+    "risk": "Critical",
+    "notes": "Historic backdoors (e.g. CVE-2019-15107 password_change.cgi backdoor) and brute-force target for root."
+  },
+  {
+    "port": 10001,
+    "proto": "udp",
+    "service": "ubiquiti-disc",
+    "name": "Ubiquiti Discovery",
+    "desc": "Ubiquiti device discovery protocol",
+    "risk": "High",
+    "notes": "Ubiquiti discovery UDP reflection DDoS amplifier."
+  },
+  {
+    "port": 10086,
+    "proto": "tcp",
+    "service": "v2ray",
+    "name": "V2Ray / Xray Proxy",
+    "desc": "Obfuscated proxy protocol",
+    "risk": "Low",
+    "notes": "Circumvention tunnel."
+  },
+  {
+    "port": 10250,
+    "proto": "tcp",
+    "service": "kubelet",
+    "name": "Kubernetes Kubelet API",
+    "desc": "Worker node kubelet daemon",
+    "risk": "Critical",
+    "notes": "If anonymous auth is enabled, allows running commands inside any pod via `/run` endpoint."
+  },
+  {
+    "port": 11211,
+    "proto": "tcp/udp",
+    "service": "memcached",
+    "name": "Memcached In-Memory Cache",
+    "desc": "High-performance distributed memory object cache",
+    "risk": "Critical",
+    "notes": "Unauthenticated cache extraction; UDP port 11211 historically weaponized for 50,000x amplification DDoS attacks."
+  },
+  {
+    "port": 12201,
+    "proto": "udp/tcp",
+    "service": "gelf-graylog",
+    "name": "Graylog GELF Input",
+    "desc": "Graylog Extended Log Format ingest",
+    "risk": "Medium",
+    "notes": "Application and infrastructure log ingestion endpoint."
+  },
+  {
+    "port": 12345,
+    "proto": "tcp",
+    "service": "netbus",
+    "name": "NetBus Trojan",
+    "desc": "Classic Windows Remote Administration Trojan",
+    "risk": "Critical",
+    "notes": "Iconic Windows backdoor from early 2000s."
+  },
+  {
+    "port": 15672,
+    "proto": "tcp",
+    "service": "rabbitmq-mgmt",
+    "name": "RabbitMQ Management UI",
+    "desc": "Web console for RabbitMQ",
+    "risk": "High",
+    "notes": "Default credentials (guest/guest). Complete control over message brokers and cluster nodes."
+  },
+  {
+    "port": 25565,
+    "proto": "tcp",
+    "service": "minecraft",
+    "name": "Minecraft Game Server",
+    "desc": "Multiplayer sandbox game server",
+    "risk": "Low",
+    "notes": "Historic Log4j (CVE-2021-44228) ground zero via chat message injection."
+  },
+  {
+    "port": 27015,
+    "proto": "udp",
+    "service": "steam-source",
+    "name": "Steam Source Engine",
+    "desc": "Valve Steam Source dedicated server",
+    "risk": "Medium",
+    "notes": "RCON password brute force and UDP query amplification."
+  },
+  {
+    "port": 27017,
+    "proto": "tcp",
+    "service": "mongodb",
+    "name": "MongoDB Database",
+    "desc": "NoSQL document-oriented database",
+    "risk": "Critical",
+    "notes": "Commonly left bound to 0.0.0.0 without authentication. Ransomware groups scan this port to wipe and ransom data."
+  },
+  {
+    "port": 27018,
+    "proto": "tcp",
+    "service": "mongodb-shard",
+    "name": "MongoDB Shard",
+    "desc": "MongoDB sharded cluster instance",
+    "risk": "High",
+    "notes": "Sharded database communication."
+  },
+  {
+    "port": 27036,
+    "proto": "udp/tcp",
+    "service": "steam-remote",
+    "name": "Steam In-Home Streaming",
+    "desc": "Valve Steam broadcast protocol",
+    "risk": "Low",
+    "notes": "Local game streaming protocol."
+  },
+  {
+    "port": 27374,
+    "proto": "tcp",
+    "service": "subseven",
+    "name": "SubSeven Trojan",
+    "desc": "Historic Windows Sub7 Backdoor",
+    "risk": "Critical",
+    "notes": "Classic malware remote control tool."
+  },
+  {
+    "port": 28017,
+    "proto": "tcp",
+    "service": "mongodb-web",
+    "name": "MongoDB Web Status",
+    "desc": "Legacy MongoDB web status interface",
+    "risk": "Medium",
+    "notes": "Information disclosure of MongoDB cluster status."
+  },
+  {
+    "port": 31337,
+    "proto": "tcp",
+    "service": "backorifice",
+    "name": "Back Orifice / Elite",
+    "desc": "Cult of the Dead Cow Trojan Backdoor",
+    "risk": "Critical",
+    "notes": "Classic hacker trojan horse."
+  },
+  {
+    "port": 50000,
+    "proto": "tcp",
+    "service": "sap-db2",
+    "name": "SAP NetWeaver / IBM DB2",
+    "desc": "Enterprise ERP / DB2 server",
+    "risk": "High",
+    "notes": "Enterprise target for financial and ERP database exfiltration."
+  },
+  {
+    "port": 50070,
+    "proto": "tcp",
+    "service": "hadoop-hdfs-v2",
+    "name": "Hadoop HDFS NameNode v2",
+    "desc": "Hadoop 2.x HDFS NameNode Web UI",
+    "risk": "High",
+    "notes": "Legacy Hadoop web console with unauthenticated directory browse."
+  },
+  {
+    "port": 51820,
+    "proto": "udp",
+    "service": "wireguard",
+    "name": "WireGuard VPN",
+    "desc": "WireGuard secure network tunnel",
+    "risk": "Low",
+    "notes": "Modern high-speed VPN; ignores unauthenticated packets for stealth."
+  }
+]
